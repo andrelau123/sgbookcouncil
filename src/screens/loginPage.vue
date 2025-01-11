@@ -25,28 +25,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      email: "",
-      password: "",
-      error: "",
-    };
-  },
-  methods: {
-    login() {
-      // Add login logic here
-      console.log("Logging in with", this.email, this.password);
-    },
-    register() {
-      // Add registration logic here
-      console.log("Registering with", this.email, this.password);
-    },
-  },
-};
-</script>
-
 <style scoped>
 /* Global Styles */
 * {
@@ -164,6 +142,7 @@ import auth from "../../firebase";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useRouter } from "vue-router";
 
@@ -174,6 +153,14 @@ const router = useRouter();
 
 function register() {
   createUserWithEmailAndPassword(auth, email.value, password.value)
+    .then((data) => {
+      router.push("/");
+    })
+    .catch((err) => (error.value = err));
+}
+
+function login() {
+  signInWithEmailAndPassword(auth, email.value, password.value)
     .then((data) => {
       router.push("/");
     })
