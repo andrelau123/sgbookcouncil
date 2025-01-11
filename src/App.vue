@@ -1,6 +1,7 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <RouterView />
+  <img alt="Vue logo" src="./assets/logo.jpeg" />
+  <h1></h1>
+  <router-view></router-view>
 </template>
 
 <script>
