@@ -1,6 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-box">
+      <img src="../assets/logonobg.png" />
       <h1 class="title">SGBOOKCOUNCIL Portal</h1>
       <h2 class="subtitle">Login</h2>
       <div class="form-group">

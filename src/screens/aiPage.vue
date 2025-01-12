@@ -1,9 +1,8 @@
 <template>
+  <navBar />
   <h1>ai page</h1>
 </template>
 
-<script>
-export default {
-  name: "aiPage",
-};
+<script setup>
+import navBar from "@/components/navBar.vue";
 </script>

@@ -35,7 +35,7 @@
             aria-expanded="false"
             id="profileDropdown"
           >
-            Profile Image
+            <img :src="profileimage" class="profile-icon" />
           </router-link>
           <ul
             class="dropdown-menu dropdown-menu-end profile"
@@ -169,6 +169,14 @@ body {
   background-color: #4e9df8;
   color: white;
 }
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -197,9 +205,11 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { signOut } from "firebase/auth";
 import auth from "../../firebase";
 import { useRouter } from "vue-router";
+import { ref } from "vue";
 
 library.add(faBell);
 const router = useRouter();
+const profileimage = ref(require("../assets/profiledefault.png"));
 
 function handleLogout() {
   signOut(auth);
