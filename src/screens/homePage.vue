@@ -1,9 +1,8 @@
 <template>
   <h1>home page</h1>
+  <NavBar />
 </template>
 
-<script>
-export default {
-  name: "homePage",
-};
+<script setup>
+import NavBar from "@/components/navBar.vue";
 </script>
