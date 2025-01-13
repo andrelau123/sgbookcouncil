@@ -203,7 +203,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { signOut } from "firebase/auth";
-import auth from "../../firebase";
+import { auth } from "../../firebase";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 

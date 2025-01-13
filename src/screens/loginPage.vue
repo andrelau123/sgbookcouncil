@@ -139,7 +139,7 @@ button {
 
 <script setup>
 import { ref } from "vue";
-import auth from "../../firebase";
+import { auth } from "../../firebase";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,

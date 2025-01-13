@@ -4,7 +4,7 @@ import tasksPage from "@/screens/tasksPage.vue";
 import profilePage from "@/screens/profilePage.vue";
 import aiPage from "@/screens/aiPage.vue";
 import loginPage from "@/screens/loginPage.vue";
-import auth from "../../firebase";
+import { auth } from "../../firebase";
 
 const routes = [
   {
