@@ -133,12 +133,12 @@ const email = ref("");
 const messresponse = ref("");
 const loading = ref(false);
 
-const uid = auth.currentUser.uid;
+const emailuser = auth.currentUser.email;
 
 async function handlesummary() {
   loading.value = true; // Start loading
   console.log("test");
-  const messageref = collection(db, "users", uid, "messages");
+  const messageref = collection(db, "users", emailuser, "messages");
   console.log("0");
   const docref = await addDoc(messageref, {
     prompt: email.value + "summarise this for me",
@@ -155,9 +155,9 @@ async function handlesummary() {
 
 function listenforresponse(parentmessid) {
   console.log("4");
-  console.log(uid);
+  console.log(emailuser);
   console.log(parentmessid);
-  const messageDocRef = doc(db, "users", uid, "messages", parentmessid);
+  const messageDocRef = doc(db, "users", emailuser, "messages", parentmessid);
   console.log("5");
   onSnapshot(messageDocRef, (doc) => {
     if (doc.exists) {
