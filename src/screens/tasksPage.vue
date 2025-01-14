@@ -17,7 +17,6 @@
     <button>Delete Task</button>
   </div> -->
 
-
   <div>
     <h1>Tasks</h1>
     <div>
@@ -40,14 +39,18 @@
 
 </template>
 
-<script setup>
-import navBar from "@/components/navBar.vue";
-</script>
-
 <script>
 import { db } from "../../firebase"; // Your Firebase initialization file
-import { collection, addDoc, deleteDoc, doc, updateDoc, getDocs } from "firebase/firestore";
 import { auth } from "../../firebase"; // Firebase authentication
+import {
+  collection,
+  doc,
+  setDoc,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  getDocs,
+} from "firebase/firestore";
 
 export default {
   data() {
@@ -58,14 +61,30 @@ export default {
     };
   },
   methods: {
+    // Ensure the user's document exists
+    async ensureUserDocumentExists() {
+      const userId = auth.currentUser?.uid;
+      if (!userId) throw new Error("No user logged in");
+
+      const userDocRef = doc(db, "users", userId);
+      await setDoc(userDocRef, { createdAt: new Date() }, { merge: true });
+    },
+
+    // Fetch tasks for the logged-in user
     async fetchTasks() {
-      const userId = auth.currentUser.uid;
+      const userId = auth.currentUser?.uid;
+      if (!userId) return console.error("No user logged in");
+
       const tasksRef = collection(db, `users/${userId}/tasks`);
       const snapshot = await getDocs(tasksRef);
       this.tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     },
+
+    // Add a new task
     async addTask() {
-      const userId = auth.currentUser.uid;
+      const userId = auth.currentUser?.uid;
+      if (!userId) return console.error("No user logged in");
+
       const tasksRef = collection(db, `users/${userId}/tasks`);
       await addDoc(tasksRef, {
         title: this.newTaskTitle,
@@ -77,21 +96,34 @@ export default {
       this.newTaskDescription = "";
       this.fetchTasks(); // Refresh tasks
     },
+
+    // Delete a task
     async deleteTask(taskId) {
-      const userId = auth.currentUser.uid;
+      const userId = auth.currentUser?.uid;
+      if (!userId) return console.error("No user logged in");
+
       const taskRef = doc(db, `users/${userId}/tasks`, taskId);
       await deleteDoc(taskRef);
       this.fetchTasks(); // Refresh tasks
     },
+
+    // Toggle task completion
     async toggleTaskCompletion(taskId, completed) {
-      const userId = auth.currentUser.uid;
+      const userId = auth.currentUser?.uid;
+      if (!userId) return console.error("No user logged in");
+
       const taskRef = doc(db, `users/${userId}/tasks`, taskId);
       await updateDoc(taskRef, { completed: !completed });
       this.fetchTasks(); // Refresh tasks
     },
   },
-  mounted() {
-    this.fetchTasks(); // Fetch tasks when the component loads
+  async mounted() {
+    try {
+      await this.ensureUserDocumentExists();
+      await this.fetchTasks(); // Fetch tasks when the component loads
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
   },
 };
 
