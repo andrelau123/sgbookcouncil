@@ -139,13 +139,14 @@ button {
 
 <script setup>
 import { ref } from "vue";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useRouter } from "vue-router";
+import { collection, setDoc, addDoc, doc } from "firebase/firestore";
 
 const email = ref("");
 const password = ref("");
@@ -156,6 +157,9 @@ function register() {
   createUserWithEmailAndPassword(auth, email.value, password.value)
     .then((data) => {
       router.push("/");
+      console.log(data.user.email);
+      const docref = doc(db, "users", data.user.email);
+      setDoc(docref, { profile: [] });
     })
     .catch((err) => (error.value = err));
 }
