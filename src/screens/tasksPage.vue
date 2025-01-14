@@ -21,12 +21,18 @@
     <h1>Tasks</h1>
     <div>
       <input v-model="newTaskTitle" type="text" placeholder="Task Title" />
-      <input v-model="newTaskDescription" type="text" placeholder="Task Description" />
+      <input
+        v-model="newTaskDescription"
+        type="text"
+        placeholder="Task Description"
+      />
       <button @click="addTask">Add Task</button>
     </div>
     <ul>
       <li v-for="task in tasks" :key="task.id">
-        <span :style="{ textDecoration: task.completed ? 'line-through' : 'none' }">
+        <span
+          :style="{ textDecoration: task.completed ? 'line-through' : 'none' }"
+        >
           {{ task.title }}: {{ task.description }}
         </span>
         <button @click="toggleTaskCompletion(task.id, task.completed)">
@@ -36,7 +42,6 @@
       </li>
     </ul>
   </div>
-
 </template>
 
 <script>
@@ -126,5 +131,4 @@ export default {
     }
   },
 };
-
 </script>

@@ -30,7 +30,7 @@
         <div class="dropdown">
           <router-link
             to="/profile"
-            class="profile-link"
+            class="profile-link dropdown-toggle"
             data-bs-toggle="dropdown"
             aria-expanded="false"
             id="profileDropdown"
@@ -206,6 +206,8 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 library.add(faBell);
 const router = useRouter();
