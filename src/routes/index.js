@@ -17,7 +17,7 @@ const routes = [
     path: "/tasks",
     name: "Tasks",
     component: tasksPage,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: "/profile",
