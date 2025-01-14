@@ -1,6 +1,6 @@
 <template>
   <navBar />
-  <br />
+  <!-- <br />
   <div class="row m-2">
     <div class="col-3 container border">Charts Visuals Overview</div>
     <div class="col-9 container border">Charts Visuals Overview</div>
@@ -15,7 +15,7 @@
   <br />
   <div>
     <button>Delete Task</button>
-  </div>
+  </div> -->
 
 
   <div>
