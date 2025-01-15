@@ -218,7 +218,7 @@ export default {
 }
 
 .completed {
-  background-color: #f5f5f5;
+  background-color: lightgray;
   color: #999;
   text-decoration: line-through;
 }
@@ -264,6 +264,8 @@ export default {
   padding: 20px;
   border-radius: 8px;
   width: 400px;
+  /* margin-top: 10px;
+  margin-bottom: 10px; */
 }
 
 .taskblock {
