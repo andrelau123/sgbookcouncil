@@ -12,35 +12,29 @@
         <option value="low">Low</option>
       </select>
       <input v-model="newTaskDueDate" type="date" class="form-control" />
-      <input v-model="newTaskAssignee" type="text" class="form-control" placeholder="Assigned To" /> <!-- New field for assignee -->
+      <input v-model="newTaskAssignee" type="text" class="form-control" placeholder="Assigned To" />
+      <!-- New field for assignee -->
       <button @click="addTask" class="btn btn-primary">Add Task</button>
     </div>
 
     <div class="row">
-      <div
-        v-for="task in sortedTasks"
-        :key="task.id"
-        class="col-md-4 col-sm-6 my-2"
-      >
-        <div
-          class="sticky-note p-3"
-          :class="{
-            'note-high': task.urgency === 'high',
-            'note-medium': task.urgency === 'medium',
-            'note-low': task.urgency === 'low',
-            completed: task.completed,
-          }"
-        >
+      <div v-for="task in sortedTasks" :key="task.id" class="col-md-4 col-sm-6 my-2">
+        <div class="sticky-note p-3" :class="{
+          'note-high': task.urgency === 'high',
+          'note-medium': task.urgency === 'medium',
+          'note-low': task.urgency === 'low',
+          completed: task.completed,
+        }">
           <button @click="deleteTask(task.id)" class="delete-btn">✖</button>
           <button @click="openEditModal(task)" class="edit-btn">✏️</button>
-          <h4>{{ task.title }}</h4>
-          <p>{{ task.description }}</p>
-          <p><strong>Assigned to:</strong> {{ task.assignee }}</p> <!-- Display assignee -->
-          <p><strong>Due:</strong> {{ task.dueDate }}</p>
-          <button
-            @click="toggleTaskCompletion(task.id, task.completed)"
-            :class="['btn', 'btn-sm', task.completed ? 'btn-secondary' : 'btn-success', 'mt-2']"
-          >
+          <div class="taskblock">
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description }}</p>
+            <p><strong>Assigned to:</strong> {{ task.assignee }}</p> <!-- Display assignee -->
+            <p><strong>Due:</strong> {{ task.dueDate }}</p>
+          </div>
+          <button @click="toggleTaskCompletion(task.id, task.completed)"
+            :class="['btn', 'btn-sm', task.completed ? 'btn-secondary' : 'btn-success', 'mt-2']">
             {{ task.completed ? "Undo" : "Complete" }}
           </button>
         </div>
@@ -59,7 +53,8 @@
           <option value="low">Low</option>
         </select>
         <input v-model="editTaskDueDate" type="date" class="form-control" />
-        <input v-model="editTaskAssignee" type="text" placeholder="Assigned To" class="form-control" /> <!-- Editable assignee field -->
+        <input v-model="editTaskAssignee" type="text" placeholder="Assigned To" class="form-control" />
+        <!-- Editable assignee field -->
         <button @click="updateTask" class="btn btn-primary mt-3">Save</button>
         <button @click="closeEditModal" class="btn btn-secondary mt-3">Cancel</button>
       </div>
@@ -206,22 +201,28 @@ export default {
   word-wrap: break-word;
   min-height: 150px;
   overflow: hidden;
-  padding-bottom: 20px; /* Add padding to the bottom of each sticky note */
+  padding-bottom: 20px;
+  /* Add padding to the bottom of each sticky note */
 }
+
 .note-high {
   background-color: #ffcccb;
 }
+
 .note-medium {
   background-color: #fff9c4;
 }
+
 .note-low {
   background-color: #dcedc8;
 }
+
 .completed {
   background-color: #f5f5f5;
   color: #999;
   text-decoration: line-through;
 }
+
 .delete-btn {
   position: absolute;
   top: 10px;
@@ -233,6 +234,7 @@ export default {
   cursor: pointer;
   padding-bottom: 20px;
 }
+
 .edit-btn {
   position: absolute;
   top: 10px;
@@ -244,6 +246,7 @@ export default {
   cursor: pointer;
   padding-bottom: 20px;
 }
+
 .modal {
   position: fixed;
   top: 0;
@@ -255,10 +258,15 @@ export default {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   background: #fff;
   padding: 20px;
   border-radius: 8px;
   width: 400px;
+}
+
+.taskblock {
+  margin-top: 18px;
 }
 </style>
