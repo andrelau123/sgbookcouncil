@@ -1,64 +1,92 @@
 <template>
-  <div>
-    <div class="header">
-      <img src="../assets/logonobg.png" alt="Logo" class="logo" />
-      <h2 class="portal-title">SBC Portal</h2>
+  <div class="header">
+    <img src="../assets/logonobg.png" alt="Logo" class="logo" />
+    <h2 class="portal-title">SBC Portal</h2>
+  </div>
+  <nav class="navbar">
+    <div class="nav-links">
+      <router-link to="/" active-class="activeclass" class="nav-link"
+        >Home</router-link
+      >
+      <router-link to="/tasks" active-class="activeclass" class="nav-link"
+        >Tasks</router-link
+      >
+      <router-link to="/aiPage" active-class="activeclass" class="nav-link"
+        >AI</router-link
+      >
     </div>
 
-    <nav class="navbar">
-      <div class="nav-links">
-        <router-link to="/" active-class="activeclass" class="nav-link"
-          >Home</router-link
-        >
-        <router-link to="/tasks" active-class="activeclass" class="nav-link"
-          >Tasks</router-link
-        >
-        <router-link to="/aiPage" active-class="activeclass" class="nav-link"
-          >AI</router-link
-        >
-      </div>
+    <div class="nav-actions">
+      <font-awesome-icon
+        :icon="['fas', 'bell']"
+        class="notification-bell"
+        id="notificationDropdown"
+        aria-expanded="false"
+        @click="handleNotificationTabClick"
+      />
 
-      <div class="nav-actions">
-        <font-awesome-icon
-          :icon="['fas', 'bell']"
-          class="notification-bell"
-          id="notificationDropdown"
+      <div class="dropdown">
+        <router-link
+          to="/profile"
+          class="profile-link dropdown-toggle"
+          data-bs-toggle="dropdown"
           aria-expanded="false"
-          @click="handleNotificationTabClick"
-        />
-
-        <div class="dropdown">
-          <router-link
-            to="/profile"
-            class="profile-link dropdown-toggle"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            id="profileDropdown"
-          >
-            <img :src="profileimage" class="profile-icon" />
-          </router-link>
-          <ul
-            class="dropdown-menu dropdown-menu-end profile"
-            aria-labelledby="profileDropdown"
-          >
-            <li>
-              <router-link to="/profile" class="dropdown-item"
-                >Profile</router-link
-              >
-            </li>
-            <li>
-              <button class="dropdown-item" @click="handleLogout">
-                Logout
-              </button>
-            </li>
-          </ul>
-        </div>
+          id="profileDropdown"
+        >
+          <img :src="profileimage" class="profile-icon" />
+        </router-link>
+        <ul
+          class="dropdown-menu dropdown-menu-end profile"
+          aria-labelledby="profileDropdown"
+        >
+          <li>
+            <router-link to="/profile" class="dropdown-item"
+              >Profile</router-link
+            >
+          </li>
+          <li>
+            <button class="dropdown-item" @click="handleLogout">Logout</button>
+          </li>
+        </ul>
       </div>
-    </nav>
-  </div>
+    </div>
+  </nav>
 </template>
 
+<script setup>
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
+import { useRouter } from "vue-router";
+import { ref } from "vue";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
+library.add(faBell);
+const router = useRouter();
+const profileimage = ref(require("../assets/profiledefault.png"));
+
+function handleLogout() {
+  signOut(auth);
+  router.replace("/login");
+}
+</script>
+
 <style scoped>
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* General Layout */
 body {
   font-family: "Arial", sans-serif;
@@ -83,16 +111,6 @@ body {
 .portal-title {
   font-size: 1.8rem;
   font-weight: bold;
-}
-
-/* Navbar */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-links {
@@ -169,6 +187,7 @@ body {
   background-color: #4e9df8;
   color: white;
 }
+
 .profile-icon {
   width: 40px;
   height: 40px;
@@ -197,24 +216,3 @@ body {
   }
 }
 </style>
-
-<script setup>
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faBell } from "@fortawesome/free-solid-svg-icons";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { signOut } from "firebase/auth";
-import { auth } from "../../firebase";
-import { useRouter } from "vue-router";
-import { ref } from "vue";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-
-library.add(faBell);
-const router = useRouter();
-const profileimage = ref(require("../assets/profiledefault.png"));
-
-function handleLogout() {
-  signOut(auth);
-  router.replace("/login");
-}
-</script>
