@@ -12,6 +12,7 @@
         <option value="low">Low</option>
       </select>
       <input v-model="newTaskDueDate" type="date" class="form-control" />
+      <input v-model="newTaskAssignee" type="text" class="form-control" placeholder="Assigned To" /> <!-- New field for assignee -->
       <button @click="addTask" class="btn btn-primary">Add Task</button>
     </div>
 
@@ -34,6 +35,7 @@
           <button @click="openEditModal(task)" class="edit-btn">✏️</button>
           <h4>{{ task.title }}</h4>
           <p>{{ task.description }}</p>
+          <p><strong>Assigned to:</strong> {{ task.assignee }}</p> <!-- Display assignee -->
           <p><strong>Due:</strong> {{ task.dueDate }}</p>
           <button
             @click="toggleTaskCompletion(task.id, task.completed)"
@@ -57,6 +59,7 @@
           <option value="low">Low</option>
         </select>
         <input v-model="editTaskDueDate" type="date" class="form-control" />
+        <input v-model="editTaskAssignee" type="text" placeholder="Assigned To" class="form-control" /> <!-- Editable assignee field -->
         <button @click="updateTask" class="btn btn-primary mt-3">Save</button>
         <button @click="closeEditModal" class="btn btn-secondary mt-3">Cancel</button>
       </div>
@@ -90,12 +93,14 @@ export default {
       newTaskDescription: "",
       newTaskUrgency: "",
       newTaskDueDate: "",
+      newTaskAssignee: "", // New property for the assignee
       isEditModalOpen: false,
       editTaskId: null,
       editTaskTitle: "",
       editTaskDescription: "",
       editTaskUrgency: "",
       editTaskDueDate: "",
+      editTaskAssignee: "", // New property for editing assignee
     };
   },
   computed: {
@@ -131,12 +136,14 @@ export default {
         description: this.newTaskDescription,
         urgency: this.newTaskUrgency,
         dueDate: this.newTaskDueDate,
+        assignee: this.newTaskAssignee, // Include assignee
         completed: false,
       });
       this.newTaskTitle = "";
       this.newTaskDescription = "";
       this.newTaskUrgency = "";
       this.newTaskDueDate = "";
+      this.newTaskAssignee = ""; // Reset assignee input
       this.fetchTasks();
     },
     openEditModal(task) {
@@ -145,6 +152,7 @@ export default {
       this.editTaskDescription = task.description;
       this.editTaskUrgency = task.urgency;
       this.editTaskDueDate = task.dueDate;
+      this.editTaskAssignee = task.assignee; // Set assignee for editing
       this.isEditModalOpen = true;
     },
     async updateTask() {
@@ -157,6 +165,7 @@ export default {
         description: this.editTaskDescription,
         urgency: this.editTaskUrgency,
         dueDate: this.editTaskDueDate,
+        assignee: this.editTaskAssignee, // Include assignee when updating
       });
       this.isEditModalOpen = false;
       this.fetchTasks();
@@ -187,7 +196,6 @@ export default {
 };
 </script>
 
-
 <style>
 .sticky-note {
   border-radius: 8px;
@@ -198,6 +206,7 @@ export default {
   word-wrap: break-word;
   min-height: 150px;
   overflow: hidden;
+  padding-bottom: 20px; /* Add padding to the bottom of each sticky note */
 }
 .note-high {
   background-color: #ffcccb;
@@ -209,7 +218,7 @@ export default {
   background-color: #dcedc8;
 }
 .completed {
-  background-color: lightgray;
+  background-color: #f5f5f5;
   color: #999;
   text-decoration: line-through;
 }
@@ -222,6 +231,7 @@ export default {
   font-size: 16px;
   color: #d32f2f;
   cursor: pointer;
+  padding-bottom: 20px;
 }
 .edit-btn {
   position: absolute;
@@ -232,6 +242,7 @@ export default {
   font-size: 16px;
   color: #1976d2;
   cursor: pointer;
+  padding-bottom: 20px;
 }
 .modal {
   position: fixed;
