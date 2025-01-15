@@ -21,8 +21,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import NavBar from "@/components/navBar.vue";
+</script>
+
+<script>
 import { db } from "../../firebase"; // Your Firebase initialization file
 import { auth } from "../../firebase"; // Firebase authentication
 import {
