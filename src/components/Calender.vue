@@ -43,8 +43,8 @@
   import { Calendar } from '@fullcalendar/core';
   import dayGridPlugin from '@fullcalendar/daygrid';
   import interactionPlugin from '@fullcalendar/interaction';
-//   import { collection, addDoc, getDocs, deleteDoc, doc, db, auth } from "../firebaseConfig";
-//   import { onAuthStateChanged } from "firebase/auth";
+  import { collection, addDoc, getDocs, deleteDoc, doc, db, auth } from "../../firebase.js";
+  import { onAuthStateChanged } from "firebase/auth";
   
   export default {
     name: 'CalendarComponent',
@@ -116,8 +116,14 @@
           hour12: false
         }
       });
-      this.calendar.render();
-      this.loadHolidays();
+
+      onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        this.userId = currentUser.email;
+        this.calendar.render();
+        this.fetchEvents();
+      }});
+
     },
     watch: {
       childId: 'fetchEvents' // Refetch events whenever childId changes
@@ -155,31 +161,30 @@
         this.showModal = false;
         this.errorMessage = '';
       },
-    //   async saveEvent() {
-    //     const { title, date, startTime, endTime } = this.newEvent;
-    //     if (title && startTime && endTime && this.childId) {
-    //       const event = {
-    //         title,
-    //         start: `${date}T${startTime}`,
-    //         end: `${date}T${endTime}`,
-    //         dismissed: false
-    //       };
+      async saveEvent() {
+        const { title, date, startTime, endTime } = this.newEvent;
+        if (title && startTime && endTime && this.userId) {
+          const event = {
+            title,
+            start: `${date}T${startTime}`,
+            end: `${date}T${endTime}`,
+            dismissed: false
+          };
+          const newCalendarEvent = this.calendar.addEvent(event);
   
-    //       const newCalendarEvent = this.calendar.addEvent(event);
-  
-    //       try {
-    //         const userEventsRef = collection(db, "users", this.userId, "children", this.childId, "events");
-    //         const docRef = await addDoc(userEventsRef, event);
-    //         newCalendarEvent.setProp('id', docRef.id);
-    //         await this.fetchEvents();
-    //       } catch (error) {
-    //         console.error("Error adding event to database:", error);
-    //       }
-    //       this.closeModal();
-    //     } else {
-    //       this.displayError("Please fill in all fields.");
-    //     }
-    //   },
+          try {
+            const userEventsRef = collection(db, "users", this.userId, "meeting");
+            const docRef = await addDoc(userEventsRef, event);
+            newCalendarEvent.setProp('id', docRef.id);
+            await this.fetchEvents();
+          } catch (error) {
+            console.error("Error adding event to database:", error);
+          }
+          this.closeModal();
+        } else {
+          this.displayError("Please fill in all fields.");
+        }
+      },
       
       displayError(message) {
         this.errorMessage = message;
@@ -199,45 +204,44 @@
           });
         });
       },
-    //   async deleteEvent() {
-    //     if (this.selectedEvent && this.childId) {
-    //       try {
-    //         const eventDocRef = doc(db, "users", this.userId, "children", this.childId, "events", this.selectedEvent.id);
-    //         await deleteDoc(eventDocRef);
-    //         const calendarEvent = this.calendar.getEventById(this.selectedEvent.id);
-    //         if (calendarEvent) {
-    //           calendarEvent.remove();
-    //         }
-    //       } catch (error) {
-    //         console.error("Error deleting event from database:", error);
-    //       }
-    //       this.closeModal();
-    //     }
-    //   },
+      async deleteEvent() {
+        if (this.selectedEvent) {
+          try {
+            const eventDocRef = doc(db, "users", this.userId, "meeting", this.selectedEvent.id);
+            await deleteDoc(eventDocRef);
+            const calendarEvent = this.calendar.getEventById(this.selectedEvent.id);
+            if (calendarEvent) {
+              calendarEvent.remove();
+            }
+          } catch (error) {
+            console.error("Error deleting event from database:", error);
+          }
+          this.closeModal();
+        }
+      },
       
-    //   async fetchEvents() {
-    //     if (!this.childId) return;
-    //     try {
-    //       const userEventsRef = collection(db, "users", this.userId, "children", this.childId, "events");
-    //       const querySnapshot = await getDocs(userEventsRef);
-    //       this.calendar.getEvents().forEach(event => event.remove());
-    //       this.loadHolidays();
-    //       querySnapshot.forEach(doc => {
-    //         const eventData = doc.data();
-    //         this.calendar.addEvent({
-    //           id: doc.id,
-    //           title: eventData.title,
-    //           start: eventData.start,
-    //           color: "#4A90E2",
-    //           borderColor: "#357ABD",
-    //           textColor: "#FFF",
-    //           display: "block",
-    //         });
-    //       });
-    //     } catch (error) {
-    //       console.error("Error fetching events from database:", error);
-    //     }
-    //   }
+      async fetchEvents() {
+        try {
+          const userEventsRef = collection(db, "users", this.userId, "meeting");
+          const querySnapshot = await getDocs(userEventsRef);
+          this.calendar.getEvents().forEach(event => event.remove());
+          this.loadHolidays();
+          querySnapshot.forEach(doc => {
+            const eventData = doc.data();
+            this.calendar.addEvent({
+              id: doc.id,
+              title: eventData.title,
+              start: eventData.start,
+              color: "#4A90E2",
+              borderColor: "#357ABD",
+              textColor: "#FFF",
+              display: "block",
+            });
+          });
+        } catch (error) {
+          console.error("Error fetching events from database:", error);
+        }
+      }
     },
     computed: {
     // Returns all time options for the start time
