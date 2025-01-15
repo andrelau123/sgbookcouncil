@@ -1,38 +1,15 @@
 <template>
-  <navBar />
-  <!-- <br />
-  <div class="row m-2">
-    <div class="col-3 container border">Charts Visuals Overview</div>
-    <div class="col-9 container border">Charts Visuals Overview</div>
-  </div>
-
-  <br />
-  <div>Tasks List</div>
-  <br />
-  <div>
-    <button>Create Task</button>
-  </div>
-  <br />
-  <div>
-    <button>Delete Task</button>
-  </div> -->
-
+  <NavBar />
   <div>
     <h1>Tasks</h1>
     <div>
       <input v-model="newTaskTitle" type="text" placeholder="Task Title" />
-      <input
-        v-model="newTaskDescription"
-        type="text"
-        placeholder="Task Description"
-      />
+      <input v-model="newTaskDescription" type="text" placeholder="Task Description" />
       <button @click="addTask">Add Task</button>
     </div>
     <ul>
       <li v-for="task in tasks" :key="task.id">
-        <span
-          :style="{ textDecoration: task.completed ? 'line-through' : 'none' }"
-        >
+        <span :style="{ textDecoration: task.completed ? 'line-through' : 'none' }">
           {{ task.title }}: {{ task.description }}
         </span>
         <button @click="toggleTaskCompletion(task.id, task.completed)">
@@ -45,6 +22,7 @@
 </template>
 
 <script>
+import NavBar from "@/components/navBar.vue";
 import { db } from "../../firebase"; // Your Firebase initialization file
 import { auth } from "../../firebase"; // Firebase authentication
 import {
@@ -68,7 +46,7 @@ export default {
   methods: {
     // Ensure the user's document exists
     async ensureUserDocumentExists() {
-      const userId = auth.currentUser?.uid;
+      const userId = auth.currentUser?.email; // Use the email as the document ID
       if (!userId) throw new Error("No user logged in");
 
       const userDocRef = doc(db, "users", userId);
@@ -77,7 +55,7 @@ export default {
 
     // Fetch tasks for the logged-in user
     async fetchTasks() {
-      const userId = auth.currentUser?.uid;
+      const userId = auth.currentUser?.email; // Use the email as the document ID
       if (!userId) return console.error("No user logged in");
 
       const tasksRef = collection(db, `users/${userId}/tasks`);
@@ -87,7 +65,7 @@ export default {
 
     // Add a new task
     async addTask() {
-      const userId = auth.currentUser?.uid;
+      const userId = auth.currentUser?.email; // Use the email as the document ID
       if (!userId) return console.error("No user logged in");
 
       const tasksRef = collection(db, `users/${userId}/tasks`);
@@ -104,7 +82,7 @@ export default {
 
     // Delete a task
     async deleteTask(taskId) {
-      const userId = auth.currentUser?.uid;
+      const userId = auth.currentUser?.email; // Use the email as the document ID
       if (!userId) return console.error("No user logged in");
 
       const taskRef = doc(db, `users/${userId}/tasks`, taskId);
@@ -114,7 +92,7 @@ export default {
 
     // Toggle task completion
     async toggleTaskCompletion(taskId, completed) {
-      const userId = auth.currentUser?.uid;
+      const userId = auth.currentUser?.email; // Use the email as the document ID
       if (!userId) return console.error("No user logged in");
 
       const taskRef = doc(db, `users/${userId}/tasks`, taskId);
