@@ -2,8 +2,8 @@
   <div class="login-container">
     <div class="login-box">
       <img src="../assets/logonobg.png" />
-      <h1 class="title">SGBOOKCOUNCIL Portal</h1>
-      <h2 class="subtitle">Login</h2>
+      <h2 class="subtitle">SGBOOKCOUNCIL PORTAL</h2>
+      <h1 class="title">LOGIN</h1>
       <div class="form-group">
         <label for="email">Username</label>
         <input id="email" type="text" placeholder="Email" v-model="email" />
@@ -56,15 +56,62 @@ h2 {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(to right, #4e9df8, #2a3d66);
+
+  background-image: url("@/assets/bg.jpg"); /* Replace with your image path */
+  background-size: cover; /* Ensures the image covers the entire screen */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Prevents tiling */
+  min-height: 100vh; /* Ensures the background covers the full height of the viewport */
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #fffae1; /* Soft yellow background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #333;
+}
+
+h1,
+h2 {
+  text-align: center;
+  color: #2a3d66;
+}
+
+/* Login Container */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+
+  background-image: url("@/assets/bg.jpg"); /* Retaining your image background */
+  background-size: cover; /* Ensures the image covers the entire screen */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Prevents tiling */
+  min-height: 100vh; /* Ensures the background covers the full height of the viewport */
 }
 
 .login-box {
-  background-color: white;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.85
+  ); /* Slightly transparent white background for contrast */
   padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+  width: 320px;
   text-align: center;
 }
 
@@ -87,16 +134,17 @@ h2 {
 
 input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
+  transition: border 0.3s ease;
 }
 
 input:focus {
   outline: none;
-  border-color: #4e9df8;
+  border-color: #ff9800; /* Yellow focus border for consistency */
 }
 
 button {
@@ -109,24 +157,24 @@ button {
 }
 
 .signup-button {
-  background-color: #ff5a5f;
+  background-color: #ff5a5f; /* Soft red for sign-up button */
   color: white;
   border: none;
 }
 
 .signup-button:hover {
-  background-color: #e04e51;
+  background-color: #e04e51; /* Darker red on hover */
 }
 
 .login-button {
-  background-color: #4e9df8;
+  background-color: #4e9df8; /* Soft blue for login button */
   color: white;
   border: none;
   margin-top: 10px;
 }
 
 .login-button:hover {
-  background-color: #3678d0;
+  background-color: #3678d0; /* Darker blue on hover */
 }
 
 /* Error Message */

@@ -2,7 +2,7 @@
   <NavBar />
   <div class="profile-container">
     <h1>My Profile</h1>
-    <input />
+    <input type="image" />
     <img src="../assets/profiledefault.png" class="profile-image" />
     <div class="profile-fields">
       <h2>Name:</h2>
