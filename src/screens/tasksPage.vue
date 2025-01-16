@@ -130,13 +130,38 @@ export default {
       const snapshot = await getDocs(usersRef);
       this.allUsers = snapshot.docs.map((doc) => doc.id); // Extract email from document IDs
     },
-    async fetchTasks() {
-      const userId = auth.currentUser?.email;
-      if (!userId) return console.error("No user logged in");
+    // async fetchTasks() {
+    //   const userId = auth.currentUser?.email;
+    //   if (!userId) return console.error("No user logged in");
 
-      const tasksRef = collection(db, `users/${userId}/tasks`);
+    //   const tasksRef = collection(db, `users/${userId}/tasks`);
+    //   const snapshot = await getDocs(tasksRef);
+    //   this.tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    // },
+    async fetchTasks() {
+      const loggedInUserEmail = auth.currentUser?.email;
+      if (!loggedInUserEmail) return console.error("No user logged in");
+
+      const tasksRef = collection(db, "users");
       const snapshot = await getDocs(tasksRef);
-      this.tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+      const allTasks = [];
+      for (const userDoc of snapshot.docs) {
+        const userId = userDoc.id; // User ID is the document ID
+        const userTasksRef = collection(db, `users/${userId}/tasks`);
+        const userTasksSnapshot = await getDocs(userTasksRef);
+
+        // Add each user's tasks to allTasks
+        userTasksSnapshot.forEach((taskDoc) => {
+          const taskData = { id: taskDoc.id, ...taskDoc.data(), creator: userId };
+          allTasks.push(taskData);
+        });
+      }
+
+      // Filter tasks assigned to or created by the logged-in user
+      this.tasks = allTasks.filter(
+        (task) => task.assignee === loggedInUserEmail || task.creator === loggedInUserEmail
+      );
     },
     async addTask() {
       const userId = auth.currentUser?.email;
