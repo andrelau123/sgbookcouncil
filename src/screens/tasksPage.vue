@@ -12,7 +12,13 @@
         <option value="low">Low</option>
       </select>
       <input v-model="newTaskDueDate" type="date" class="form-control" />
-      <input v-model="newTaskAssignee" type="text" class="form-control" placeholder="Assigned To" />
+      <select v-model="newTaskAssignee" class="form-select">
+        <option value="" disabled>Select Assignee</option>
+        <option v-for="user in allUsers" :key="user" :value="user">
+          {{ user }}
+        </option>
+      </select>
+
       <!-- New field for assignee -->
       <button @click="addTask" class="btn btn-primary">Add Task</button>
     </div>
@@ -53,7 +59,13 @@
           <option value="low">Low</option>
         </select>
         <input v-model="editTaskDueDate" type="date" class="form-control" />
-        <input v-model="editTaskAssignee" type="text" placeholder="Assigned To" class="form-control" />
+        <select v-model="editTaskAssignee" class="form-select">
+          <option value="" disabled>Select Assignee</option>
+          <option v-for="user in allUsers" :key="user" :value="user">
+            {{ user }}
+          </option>
+        </select>
+
         <!-- Editable assignee field -->
         <button @click="updateTask" class="btn btn-primary mt-3">Save</button>
         <button @click="closeEditModal" class="btn btn-secondary mt-3">Cancel</button>
@@ -113,6 +125,11 @@ export default {
     },
   },
   methods: {
+    async fetchUsers() {
+      const usersRef = collection(db, "users");
+      const snapshot = await getDocs(usersRef);
+      this.allUsers = snapshot.docs.map((doc) => doc.id); // Extract email from document IDs
+    },
     async fetchTasks() {
       const userId = auth.currentUser?.email;
       if (!userId) return console.error("No user logged in");
@@ -187,6 +204,7 @@ export default {
   },
   mounted() {
     this.fetchTasks();
+    this.fetchUsers(); // Fetch user emails
   },
 };
 </script>
