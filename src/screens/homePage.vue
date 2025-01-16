@@ -7,36 +7,61 @@ import OrgCalendar from "../components/OrgCalender.vue";
 const selectedCalendar = ref("myCalendar");
 </script>
 <template>
-	<navBar />
-	<div class="container">
-		<div class="dropdown-container">
-			<label for="calendar-select" class="dropdown-label"
-				>Select Calendar:</label
-			>
-			<select
-				id="calendar-select"
-				v-model="selectedCalendar"
-				class="dropdown-select"
-			>
-				<option value="myCalendar">My Calendar</option>
-				<option value="orgCalendar">Organization Calendar</option>
-			</select>
-		</div>
+  <navBar />
+  <div class="container">
+    <!-- Welcome Back Header -->
+    <div class="welcome-header">
+      <h1>Welcome Back, {{ userName }}!</h1>
+    </div>
 
-		<!-- Conditional rendering of calendars -->
-		<div v-if="selectedCalendar === 'myCalendar'">
-			<h2>My Calendar</h2>
-			<CalendarComponent />
-		</div>
+    <div class="dropdown-container">
+      <label for="calendar-select" class="dropdown-label"
+        >Select Calendar:</label
+      >
+      <select
+        id="calendar-select"
+        v-model="selectedCalendar"
+        class="dropdown-select"
+      >
+        <option value="myCalendar">My Calendar</option>
+        <option value="orgCalendar">Organization Calendar</option>
+      </select>
+    </div>
 
-		<div v-else>
-			<h2>Organization Calendar</h2>
-			<OrgCalendar />
-		</div>
-	</div>
+    <!-- Conditional rendering of calendars -->
+    <div v-if="selectedCalendar === 'myCalendar'">
+      <h2>My Calendar</h2>
+      <CalendarComponent />
+    </div>
+
+    <div v-else>
+      <h2>Organization Calendar</h2>
+      <OrgCalendar />
+    </div>
+  </div>
 </template>
 
 <style scoped>
+/* Welcome Back Header */
+.welcome-header {
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px;
+  font-family: "Poppins", sans-serif; /* Modern, clean font */
+}
+
+.welcome-header h1 {
+  font-size: 2rem; /* Large, bold font */
+  color: #344563; /* Dark, neutral grey */
+  margin-bottom: 10px; /* Space below the header */
+}
+
+.welcome-header p {
+  font-size: 1rem; /* Smaller subtitle font */
+  color: #6b778c; /* Softer grey for contrast */
+  margin: 0; /* No extra margins */
+}
+
 /* Dropdown Container */
 .dropdown-container {
   margin-top: 20px;
@@ -95,6 +120,4 @@ const selectedCalendar = ref("myCalendar");
     width: 100%; /* Full-width for better mobile usability */
   }
 }
-
-
 </style>
