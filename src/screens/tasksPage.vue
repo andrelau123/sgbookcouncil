@@ -76,7 +76,7 @@
             <p><strong>Due:</strong> {{ task.dueDate }}</p>
           </div>
           <button
-            @click="toggleTaskCompletion(task.id, task.completed)"
+            @click="toggleTaskCompletion(task, task.completed)"
             :class="[
               'btn',
               'btn-sm',
@@ -267,12 +267,13 @@ export default {
         console.error("Error deleting task:", error.message);
       }
     },
-    async toggleTaskCompletion(taskId, completed) {
+    async toggleTaskCompletion(task, completed) {
       const userId = auth.currentUser?.email;
       if (!userId) return console.error("No user logged in");
 
       try {
-        const taskRef = doc(db, `users/${userId}/tasks`, taskId);
+        const idd = task.creator;
+        const taskRef = doc(db, `users/${userId}/tasks`, task.id);
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
