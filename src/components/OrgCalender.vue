@@ -63,12 +63,15 @@
 			</div>
 
 			<div v-else>
-                {{ selectedEvent }}
-				<!-- Display event details with an option to delete -->
-				<p><strong>Meeting:</strong> {{ selectedEvent.title }}</p>
-				<p><strong>Date:</strong> {{ selectedEvent.date }}</p>
-				<p><strong>Time:</strong> {{ selectedEvent.time }}</p>
-                <p><strong>Participants:</strong> {{ selectedEvent.participants }}</p>
+                    <!-- Display event details with an option to delete -->
+                    <p><strong>Meeting:</strong> {{ selectedEvent.title }}</p>
+                    <p><strong>Date:</strong> {{ selectedEvent.date }}</p>
+                    <p><strong>Time:</strong> {{ selectedEvent.time }}</p>
+                    <strong>Participants:</strong>
+                    <p v-if="selectedEvent.participants && selectedEvent.participants.length">
+                        {{ selectedEvent.participants.join(', ') }}
+                    </p>
+                    <p v-else>No participants added.</p>
 
 				<button @click="deleteEvent">Delete Event</button>
 				<button @click="closeModal">Close</button>
