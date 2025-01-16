@@ -111,13 +111,7 @@
           <option value="low">Low</option>
         </select>
         <input v-model="editTaskDueDate" type="date" class="form-control" />
-        <select v-model="editTaskAssignee" class="form-select">
-          <option value="" disabled>Select Assignee</option>
-          <option v-for="user in allUsers" :key="user" :value="user">
-            {{ user }}
-          </option>
-        </select>
-        <button @click="updateTask" btn btn-primary mt-3>Save</button>
+        <button @click="updateTask" class="btn btn-primary mt-3">Save</button>
         <button @click="closeEditModal" class="btn btn-secondary mt-3">
           Cancel
         </button>
@@ -142,6 +136,8 @@ import {
   updateDoc,
   getDocs,
   getDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
 export default {
@@ -193,25 +189,34 @@ export default {
       if (!loggedInUserEmail) return console.error("No user logged in");
 
       try {
-        const tasksRef = collection(db, "users");
+        const tasksRef = collection(db, "users", loggedInUserEmail, "tasks");
         const snapshot = await getDocs(tasksRef);
 
         const allTasks = [];
-        for (const userDoc of snapshot.docs) {
-          const userId = userDoc.id;
-          console.log(userId);
-          const userTasksRef = collection(db, `users/${userId}/tasks`);
-          const userTasksSnapshot = await getDocs(userTasksRef);
 
-          userTasksSnapshot.forEach((taskDoc) => {
-            const taskData = {
-              id: taskDoc.id,
-              ...taskDoc.data(),
-              creator: userId,
-            };
-            allTasks.push(taskData);
-          });
-        }
+        // for (const userDoc of snapshot.docs) {
+        //   const userId = userDoc.id;
+        //   console.log(userId);
+        //   const userTasksRef = collection(db, `users/${userId}/tasks`);
+        //   const userTasksSnapshot = await getDocs(userTasksRef);
+
+        //   userTasksSnapshot.forEach((taskDoc) => {
+        //     const taskData = {
+        //       id: taskDoc.id,
+        //       ...taskDoc.data(),
+        //       creator: userId,
+        //     };
+        //     allTasks.push(taskData);
+        //   });
+        // }
+
+        snapshot.forEach((taskdoc) => {
+          const taskdata = {
+            id: taskdoc.id,
+            ...taskdoc.data(),
+          };
+          allTasks.push(taskdata);
+        });
 
         this.tasks = allTasks.filter(
           (task) =>
@@ -228,6 +233,7 @@ export default {
 
       try {
         const tasksRef = collection(db, `users/${userId}/tasks`);
+
         await addDoc(tasksRef, {
           title: this.newTaskTitle,
           description: this.newTaskDescription,
@@ -235,7 +241,23 @@ export default {
           dueDate: this.newTaskDueDate,
           assignee: this.newTaskAssignee,
           completed: false,
+          creator: userId,
         });
+        if (userId != this.newTaskAssignee) {
+          const tasksRef2 = collection(
+            db,
+            `users/${this.newTaskAssignee}/tasks`
+          );
+          await addDoc(tasksRef2, {
+            title: this.newTaskTitle,
+            description: this.newTaskDescription,
+            urgency: this.newTaskUrgency,
+            dueDate: this.newTaskDueDate,
+            assignee: this.newTaskAssignee,
+            completed: false,
+            creator: userId,
+          });
+        }
         this.newTaskTitle = "";
         this.newTaskDescription = "";
         this.newTaskUrgency = "";
@@ -248,12 +270,27 @@ export default {
     },
     async deleteTask(task) {
       const userId = auth.currentUser?.email;
-
       if (!userId) return console.error("No user logged in");
 
       try {
-        const idd = task.creator;
-        const taskRef = doc(db, `users/${idd}/tasks`, task.id);
+        const curremail = auth.currentUser.email;
+        const taskRef = doc(db, `users/${curremail}/tasks`, task.id);
+        console.log(1);
+        var taskref2 = "";
+        if (curremail == task.creator) {
+          console.log(3);
+          const reff = collection(db, `users/${task.assignee}/tasks`);
+          const q = query(reff, where("creator", "==", curremail));
+          console.log(q);
+          const ss = await getDocs(q);
+          taskref2 = doc(db, `users/${task.assignee}/tasks`, ss.docs[0].id);
+        } else {
+          console.log(2);
+          const reff = collection(db, `users/${task.creator}/tasks`);
+          const q = query(reff, where("assignee", "==", curremail));
+          const ss = await getDocs(q);
+          taskref2 = doc(db, `users/${task.creator}/tasks`, ss.docs[0].id);
+        }
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
@@ -262,6 +299,7 @@ export default {
         }
 
         await deleteDoc(taskRef);
+        await deleteDoc(taskref2);
         this.fetchTasks();
       } catch (error) {
         console.error("Error deleting task:", error.message);
@@ -272,16 +310,38 @@ export default {
       if (!userId) return console.error("No user logged in");
 
       try {
-        const idd = task.creator;
-        const taskRef = doc(db, `users/${idd}/tasks`, task.id);
+        const taskRef = doc(
+          db,
+          `users/${auth.currentUser.email}/tasks`,
+          task.id
+        );
+
+        const curremail = auth.currentUser.email;
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
+        var taskref2;
         if (!taskDoc.exists()) {
           throw new Error("Task does not exist.");
         }
 
+        if (curremail == task.creator) {
+          console.log(3);
+          const reff = collection(db, `users/${task.assignee}/tasks`);
+          const q = query(reff, where("creator", "==", curremail));
+          console.log(q);
+          const ss = await getDocs(q);
+          taskref2 = doc(db, `users/${task.assignee}/tasks`, ss.docs[0].id);
+        } else {
+          console.log(2);
+          const reff = collection(db, `users/${task.creator}/tasks`);
+          const q = query(reff, where("assignee", "==", curremail));
+          const ss = await getDocs(q);
+          taskref2 = doc(db, `users/${task.creator}/tasks`, ss.docs[0].id);
+        }
+
         await updateDoc(taskRef, { completed: !completed });
+        await updateDoc(taskref2, { completed: !completed });
         this.fetchTasks();
       } catch (error) {
         console.error("Error toggling task completion:", error.message);
@@ -303,9 +363,9 @@ export default {
         return console.error("Invalid operation");
 
       try {
-        const taskidd = this.currentopentaskid;
-        console.log(taskidd + "TASKID");
-        const taskRef = doc(db, `users/${taskidd}/tasks`, this.editTaskId);
+        const curremail = auth.currentUser.email;
+
+        const taskRef = doc(db, `users/${curremail}/tasks`, this.editTaskId);
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
@@ -313,12 +373,42 @@ export default {
           throw new Error("Task does not exist.");
         }
 
+        var taskref2;
+
+        if (curremail == this.currentopentaskid) {
+          console.log(3);
+          const reff = collection(db, `users/${this.editTaskAssignee}/tasks`);
+          const q = query(reff, where("creator", "==", curremail));
+          console.log(q);
+          const ss = await getDocs(q);
+          taskref2 = doc(
+            db,
+            `users/${this.editTaskAssignee}/tasks`,
+            ss.docs[0].id
+          );
+        } else {
+          console.log(2);
+          const reff = collection(db, `users/${this.currentopentaskid}/tasks`);
+          const q = query(reff, where("assignee", "==", curremail));
+          const ss = await getDocs(q);
+          taskref2 = doc(
+            db,
+            `users/${this.currentopentaskid}/tasks`,
+            ss.docs[0].id
+          );
+        }
+
         await updateDoc(taskRef, {
           title: this.editTaskTitle,
           description: this.editTaskDescription,
           urgency: this.editTaskUrgency,
           dueDate: this.editTaskDueDate,
-          assignee: this.editTaskAssignee,
+        });
+        await updateDoc(taskref2, {
+          title: this.editTaskTitle,
+          description: this.editTaskDescription,
+          urgency: this.editTaskUrgency,
+          dueDate: this.editTaskDueDate,
         });
         this.isEditModalOpen = false;
         this.fetchTasks();
