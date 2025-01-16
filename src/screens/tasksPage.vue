@@ -3,8 +3,18 @@
   <div class="container">
     <h1 class="text-center my-4">Task Manager</h1>
     <div class="input-group mb-3">
-      <input v-model="newTaskTitle" type="text" class="form-control" placeholder="Task Title" />
-      <input v-model="newTaskDescription" type="text" class="form-control" placeholder="Task Description" />
+      <input
+        v-model="newTaskTitle"
+        type="text"
+        class="form-control"
+        placeholder="Task Title"
+      />
+      <input
+        v-model="newTaskDescription"
+        type="text"
+        class="form-control"
+        placeholder="Task Description"
+      />
       <select v-model="newTaskUrgency" class="form-select">
         <option value="" disabled>Select Urgency</option>
         <option value="high">High</option>
@@ -23,26 +33,41 @@
 
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
-        <a class="nav-link" :class="{ active: activeTab === 'given' }" @click="activeTab = 'given'">
+        <a
+          class="nav-link"
+          :class="{ active: activeTab === 'given' }"
+          @click="activeTab = 'given'"
+        >
           Tasks Given
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" :class="{ active: activeTab === 'received' }" @click="activeTab = 'received'">
+        <a
+          class="nav-link"
+          :class="{ active: activeTab === 'received' }"
+          @click="activeTab = 'received'"
+        >
           Tasks Received
         </a>
       </li>
     </ul>
 
     <div class="row">
-      <div v-for="task in filteredTasks" :key="task.id" class="col-md-4 col-sm-6 my-2">
-        <div class="sticky-note p-3" :class="{
-          'note-high': task.urgency === 'high',
-          'note-medium': task.urgency === 'medium',
-          'note-low': task.urgency === 'low',
-          completed: task.completed,
-        }">
-          <button @click="deleteTask(task.id)" class="delete-btn">✖</button>
+      <div
+        v-for="task in filteredTasks"
+        :key="task.id"
+        class="col-md-4 col-sm-6 my-2"
+      >
+        <div
+          class="sticky-note p-3"
+          :class="{
+            'note-high': task.urgency === 'high',
+            'note-medium': task.urgency === 'medium',
+            'note-low': task.urgency === 'low',
+            completed: task.completed,
+          }"
+        >
+          <button @click="deleteTask(task)" class="delete-btn">✖</button>
           <button @click="openEditModal(task)" class="edit-btn">✏️</button>
           <div class="taskblock">
             <h4>{{ task.title }}</h4>
@@ -50,8 +75,15 @@
             <p><strong>Assigned to:</strong> {{ task.assignee }}</p>
             <p><strong>Due:</strong> {{ task.dueDate }}</p>
           </div>
-          <button @click="toggleTaskCompletion(task.id, task.completed)"
-            :class="['btn', 'btn-sm', task.completed ? 'btn-secondary' : 'btn-success', 'mt-2']">
+          <button
+            @click="toggleTaskCompletion(task.id, task.completed)"
+            :class="[
+              'btn',
+              'btn-sm',
+              task.completed ? 'btn-secondary' : 'btn-success',
+              'mt-2',
+            ]"
+          >
             {{ task.completed ? "Undo" : "Complete" }}
           </button>
         </div>
@@ -61,8 +93,18 @@
     <div v-if="isEditModalOpen" class="modal">
       <div class="modal-content">
         <h3>Edit Task</h3>
-        <input v-model="editTaskTitle" type="text" placeholder="Task Title" class="form-control" />
-        <input v-model="editTaskDescription" type="text" placeholder="Task Description" class="form-control" />
+        <input
+          v-model="editTaskTitle"
+          type="text"
+          placeholder="Task Title"
+          class="form-control"
+        />
+        <input
+          v-model="editTaskDescription"
+          type="text"
+          placeholder="Task Description"
+          class="form-control"
+        />
         <select v-model="editTaskUrgency" class="form-select">
           <option value="high">High</option>
           <option value="medium">Medium</option>
@@ -75,8 +117,10 @@
             {{ user }}
           </option>
         </select>
-        <button @click="updateTask" class="btn btn-primary mt-3">Save</button>
-        <button @click="closeEditModal" class="btn btn-secondary mt-3">Cancel</button>
+        <button @click="updateTask" btn btn-primary mt-3>Save</button>
+        <button @click="closeEditModal" class="btn btn-secondary mt-3">
+          Cancel
+        </button>
       </div>
     </div>
   </div>
@@ -117,15 +161,20 @@ export default {
       editTaskUrgency: "",
       editTaskDueDate: "",
       editTaskAssignee: "",
+      currentopentaskid: "",
       allUsers: [], // Added this for `allUsers` to avoid undefined reference
     };
   },
   computed: {
     filteredTasks() {
       if (this.activeTab === "given") {
-        return this.tasks.filter((task) => task.creator === auth.currentUser?.email);
+        return this.tasks.filter(
+          (task) => task.creator === auth.currentUser?.email
+        );
       } else {
-        return this.tasks.filter((task) => task.assignee === auth.currentUser?.email);
+        return this.tasks.filter(
+          (task) => task.assignee === auth.currentUser?.email
+        );
       }
     },
   },
@@ -150,18 +199,24 @@ export default {
         const allTasks = [];
         for (const userDoc of snapshot.docs) {
           const userId = userDoc.id;
+          console.log(userId);
           const userTasksRef = collection(db, `users/${userId}/tasks`);
           const userTasksSnapshot = await getDocs(userTasksRef);
 
           userTasksSnapshot.forEach((taskDoc) => {
-            const taskData = { id: taskDoc.id, ...taskDoc.data(), creator: userId };
+            const taskData = {
+              id: taskDoc.id,
+              ...taskDoc.data(),
+              creator: userId,
+            };
             allTasks.push(taskData);
           });
         }
 
         this.tasks = allTasks.filter(
           (task) =>
-            task.assignee === loggedInUserEmail || task.creator === loggedInUserEmail
+            task.assignee === loggedInUserEmail ||
+            task.creator === loggedInUserEmail
         );
       } catch (error) {
         console.error("Error fetching tasks:", error.message);
@@ -191,12 +246,14 @@ export default {
         console.error("Error adding task:", error.message);
       }
     },
-    async deleteTask(taskId) {
+    async deleteTask(task) {
       const userId = auth.currentUser?.email;
+
       if (!userId) return console.error("No user logged in");
 
       try {
-        const taskRef = doc(db, `users/${userId}/tasks`, taskId);
+        const idd = task.creator;
+        const taskRef = doc(db, `users/${idd}/tasks`, task.id);
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
@@ -237,13 +294,17 @@ export default {
       this.editTaskDueDate = task.dueDate;
       this.editTaskAssignee = task.assignee;
       this.isEditModalOpen = true;
+      this.currentopentaskid = task.creator;
     },
     async updateTask() {
       const userId = auth.currentUser?.email;
-      if (!userId || !this.editTaskId) return console.error("Invalid operation");
+      if (!userId || !this.editTaskId)
+        return console.error("Invalid operation");
 
       try {
-        const taskRef = doc(db, `users/${userId}/tasks`, this.editTaskId);
+        const taskidd = this.currentopentaskid;
+        console.log(taskidd + "TASKID");
+        const taskRef = doc(db, `users/${taskidd}/tasks`, this.editTaskId);
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
@@ -274,7 +335,6 @@ export default {
   },
 };
 </script>
-
 
 <style>
 .sticky-note {
