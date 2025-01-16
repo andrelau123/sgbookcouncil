@@ -474,7 +474,7 @@ button:hover {
 }
 
 #calendar {
-	margin-top: 20px;
+	margin-top: 5px;
 }
 ::v-deep .fc-daygrid-day-frame,
 .fc-col-header-cell {
