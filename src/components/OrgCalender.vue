@@ -1,12 +1,12 @@
 <template>
 	<div id="calendar"></div>
 	<!-- Modal for adding or viewing event details -->
+    
 	<div v-if="showModal" class="modal">
 		<div class="modal-content">
 			<h3>
 				{{ modalMode === "add" ? "Add a Meeting" : "Meeting Details" }}
 			</h3>
-
 			<div v-if="modalMode === 'add'">
 				<!-- Input fields for adding a new event -->
 				<label class="col-md-6 col-12">Purpose:</label>
@@ -15,6 +15,20 @@
 					v-model="newEvent.title"
 					class="col-md-6 col-12 mb-1"
 				/>
+                <label class="col-md-6 col-12">Participants:</label>
+				<select
+					v-model="selectedParticipants" multiple
+					class="col-md-6 mb-1 col-12"
+				>
+                
+                <option
+                    v-for="participant in participants"
+                    :key="participant.id"
+                    :value="participant.id"
+                >
+                    {{ participant.id }}
+                </option>
+				</select>
 
 				<label class="col-md-6 col-12">Meeting Start Time:</label>
 				<select
@@ -49,10 +63,12 @@
 			</div>
 
 			<div v-else>
+                {{ selectedEvent }}
 				<!-- Display event details with an option to delete -->
 				<p><strong>Meeting:</strong> {{ selectedEvent.title }}</p>
 				<p><strong>Date:</strong> {{ selectedEvent.date }}</p>
 				<p><strong>Time:</strong> {{ selectedEvent.time }}</p>
+                <p><strong>Participants:</strong> {{ selectedEvent.participants }}</p>
 
 				<button @click="deleteEvent">Delete Event</button>
 				<button @click="closeModal">Close</button>
@@ -69,6 +85,7 @@ import {
 	collection,
 	addDoc,
 	getDocs,
+    getDoc,
 	deleteDoc,
 	doc,
 	db,
@@ -77,7 +94,7 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 
 export default {
-	name: "CalendarComponent",
+	name: "OrgCalendar",
 	props: {
 		childId: {
 			type: String,
@@ -90,11 +107,13 @@ export default {
 			showModal: false,
 			modalMode: "add",
 			userId: null,
+			name: null,
 			newEvent: {
 				title: "",
 				date: "",
 				startTime: "",
 				endTime: "",
+                participants: [],
 			},
 			errorMessage: "",
 			timeOptions: [
@@ -173,6 +192,8 @@ export default {
 				{ date: "2025-12-25", name: "Christmas Day" },
 			],
 			selectedEvent: null,
+            participants: [],
+            selectedParticipants: [],
 		};
 	},
 	mounted() {
@@ -192,8 +213,10 @@ export default {
 		onAuthStateChanged(auth, (currentUser) => {
 			if (currentUser) {
 				this.userId = currentUser.email;
+				this.email = currentUser.email;
 				this.calendar.render();
-				this.fetchEvents();
+                console.log(this.fetchEvents())
+                this.participants = this.fetchParticipants();
 			}
 		});
 	},
@@ -206,7 +229,7 @@ export default {
 			this.newEvent.date = info.dateStr;
 			this.showModal = true;
 		},
-		handleEventClick(info) {
+		async handleEventClick(info) {
 			this.modalMode = "view";
 			const formattedDate = info.event.start.toLocaleDateString("en-US", {
 				month: "short",
@@ -218,11 +241,13 @@ export default {
 				minute: "2-digit",
 				hour12: false,
 			});
+            const participants = await this.fetchEventParticipants(info.event.id);
 			this.selectedEvent = {
 				id: info.event.id,
 				title: info.event.title,
 				date: formattedDate,
 				time: formattedTime,
+                participants,
 				dismissed: false,
 			};
 			this.showModal = true;
@@ -234,25 +259,36 @@ export default {
 			this.errorMessage = "";
 		},
 		async saveEvent() {
-			const { title, date, startTime, endTime } = this.newEvent;
+			const { title, date, startTime, endTime, participants } = this.newEvent;
 			if (title && startTime && endTime && this.userId) {
 				const event = {
 					title,
 					start: `${date}T${startTime}`,
 					end: `${date}T${endTime}`,
 					dismissed: false,
+                    participants: [...this.selectedParticipants, this.userId],
 				};
 				const newCalendarEvent = this.calendar.addEvent(event);
 
 				try {
-					const userEventsRef = collection(
-						db,
-						"users",
-						this.userId,
-						"meeting"
-					);
-					const docRef = await addDoc(userEventsRef, event);
-					newCalendarEvent.setProp("id", docRef.id);
+                    const orgEventsRef = collection(db, "organization_calendar");
+                    const orgDocRef = await addDoc(orgEventsRef, event);
+                    console.log(`Event added to organization_calendar with ID: ${orgDocRef.id}`);
+
+                    // Save to user's personal calendar
+                    for (const participantId of event.participants) {
+                        const participantEventsRef = collection(db, "users", participantId, "meeting");
+                        await addDoc(participantEventsRef, {
+                            ...event,
+                            organizationEventId: orgDocRef.id, // Add a reference to the organization event
+                        });
+                        console.log(`Event added to participant (userId: ${participantId}) calendar`);
+                    }
+
+
+
+                    // Update the calendar event with the organization ID
+                    newCalendarEvent.setProp("id", orgDocRef.id);
 					await this.fetchEvents();
 				} catch (error) {
 					console.error("Error adding event to database:", error);
@@ -284,14 +320,20 @@ export default {
 		async deleteEvent() {
 			if (this.selectedEvent) {
 				try {
+                    const participants = await this.fetchEventParticipants(this.selectedEvent.id);
+
 					const eventDocRef = doc(
-						db,
-						"users",
-						this.userId,
-						"meeting",
-						this.selectedEvent.id
+                        db, "organization_calendar",this.selectedEvent.id
 					);
 					await deleteDoc(eventDocRef);
+
+                    for (const participantId of participants) {
+                        const participantEventDocRef = doc(
+                            db, "users", participantId, "meeting", this.selectedEvent.id
+                        );
+                        await deleteDoc(participantEventDocRef);
+                        console.log(`Deleted event from participant (userId: ${participantId}) calendar`);
+                    }
 					const calendarEvent = this.calendar.getEventById(
 						this.selectedEvent.id
 					);
@@ -307,12 +349,7 @@ export default {
 
 		async fetchEvents() {
 			try {
-				const userEventsRef = collection(
-					db,
-					"users",
-					this.userId,
-					"meeting"
-				);
+				const userEventsRef = collection(db, "organization_calendar");
 				const querySnapshot = await getDocs(userEventsRef);
 				this.calendar.getEvents().forEach((event) => event.remove());
 				this.loadHolidays();
@@ -332,6 +369,35 @@ export default {
 				console.error("Error fetching events from database:", error);
 			}
 		},
+
+        async fetchParticipants() {
+            const participantsRef = collection(db, "users");
+            const participants = [];
+            try {
+                const querySnapshot = await getDocs(participantsRef);
+                querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                participants.push({ id: doc.id });
+                });
+            } catch (error) {
+                console.error("Error fetching participants:", error);
+            }
+            this.participants = participants;
+        },
+        async fetchEventParticipants(eventId) {
+            const eventRef = doc(db, "organization_calendar", eventId);
+            const participants = [];
+            try {
+                const docSnap = await getDoc(eventRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    participants.push(...data.participants);
+                }
+            } catch (error) {
+                console.error("Error fetching event participants:", error);
+            }
+            return participants;
+        },
 	},
 	computed: {
 		// Returns all time options for the start time
