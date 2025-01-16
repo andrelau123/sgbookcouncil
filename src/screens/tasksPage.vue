@@ -273,7 +273,7 @@ export default {
 
       try {
         const idd = task.creator;
-        const taskRef = doc(db, `users/${userId}/tasks`, task.id);
+        const taskRef = doc(db, `users/${idd}/tasks`, task.id);
 
         // Check if task exists
         const taskDoc = await getDoc(taskRef);
