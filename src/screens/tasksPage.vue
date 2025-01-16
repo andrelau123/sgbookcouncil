@@ -18,13 +18,24 @@
           {{ user }}
         </option>
       </select>
-
-      <!-- New field for assignee -->
       <button @click="addTask" class="btn btn-primary">Add Task</button>
     </div>
 
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item">
+        <a class="nav-link" :class="{ active: activeTab === 'given' }" @click="activeTab = 'given'">
+          Tasks Given
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" :class="{ active: activeTab === 'received' }" @click="activeTab = 'received'">
+          Tasks Received
+        </a>
+      </li>
+    </ul>
+
     <div class="row">
-      <div v-for="task in sortedTasks" :key="task.id" class="col-md-4 col-sm-6 my-2">
+      <div v-for="task in filteredTasks" :key="task.id" class="col-md-4 col-sm-6 my-2">
         <div class="sticky-note p-3" :class="{
           'note-high': task.urgency === 'high',
           'note-medium': task.urgency === 'medium',
@@ -36,7 +47,7 @@
           <div class="taskblock">
             <h4>{{ task.title }}</h4>
             <p>{{ task.description }}</p>
-            <p><strong>Assigned to:</strong> {{ task.assignee }}</p> <!-- Display assignee -->
+            <p><strong>Assigned to:</strong> {{ task.assignee }}</p>
             <p><strong>Due:</strong> {{ task.dueDate }}</p>
           </div>
           <button @click="toggleTaskCompletion(task.id, task.completed)"
@@ -47,7 +58,6 @@
       </div>
     </div>
 
-    <!-- Edit Modal -->
     <div v-if="isEditModalOpen" class="modal">
       <div class="modal-content">
         <h3>Edit Task</h3>
@@ -65,15 +75,12 @@
             {{ user }}
           </option>
         </select>
-
-        <!-- Editable assignee field -->
         <button @click="updateTask" class="btn btn-primary mt-3">Save</button>
         <button @click="closeEditModal" class="btn btn-secondary mt-3">Cancel</button>
       </div>
     </div>
   </div>
 </template>
-
 
 <script setup>
 import NavBar from "@/components/navBar.vue";
@@ -90,6 +97,7 @@ import {
   deleteDoc,
   updateDoc,
   getDocs,
+  getDoc,
 } from "firebase/firestore";
 
 export default {
@@ -100,88 +108,126 @@ export default {
       newTaskDescription: "",
       newTaskUrgency: "",
       newTaskDueDate: "",
-      newTaskAssignee: "", // New property for the assignee
+      newTaskAssignee: "",
+      activeTab: "given", // Tracks the current tab
       isEditModalOpen: false,
       editTaskId: null,
       editTaskTitle: "",
       editTaskDescription: "",
       editTaskUrgency: "",
       editTaskDueDate: "",
-      editTaskAssignee: "", // New property for editing assignee
+      editTaskAssignee: "",
+      allUsers: [], // Added this for `allUsers` to avoid undefined reference
     };
   },
   computed: {
-    sortedTasks() {
-      return this.tasks.sort((a, b) => {
-        if (a.completed !== b.completed) {
-          return a.completed ? 1 : -1; // Move completed tasks to the bottom
-        }
-        const urgencyOrder = { high: 1, medium: 2, low: 3 };
-        if (urgencyOrder[a.urgency] !== urgencyOrder[b.urgency]) {
-          return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
-        }
-        return new Date(a.dueDate) - new Date(b.dueDate);
-      });
+    filteredTasks() {
+      if (this.activeTab === "given") {
+        return this.tasks.filter((task) => task.creator === auth.currentUser?.email);
+      } else {
+        return this.tasks.filter((task) => task.assignee === auth.currentUser?.email);
+      }
     },
   },
   methods: {
     async fetchUsers() {
-      const usersRef = collection(db, "users");
-      const snapshot = await getDocs(usersRef);
-      this.allUsers = snapshot.docs.map((doc) => doc.id); // Extract email from document IDs
+      try {
+        const usersRef = collection(db, "users");
+        const snapshot = await getDocs(usersRef);
+        this.allUsers = snapshot.docs.map((doc) => doc.id);
+      } catch (error) {
+        console.error("Error fetching users:", error.message);
+      }
     },
-    // async fetchTasks() {
-    //   const userId = auth.currentUser?.email;
-    //   if (!userId) return console.error("No user logged in");
-
-    //   const tasksRef = collection(db, `users/${userId}/tasks`);
-    //   const snapshot = await getDocs(tasksRef);
-    //   this.tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    // },
     async fetchTasks() {
       const loggedInUserEmail = auth.currentUser?.email;
       if (!loggedInUserEmail) return console.error("No user logged in");
 
-      const tasksRef = collection(db, "users");
-      const snapshot = await getDocs(tasksRef);
+      try {
+        const tasksRef = collection(db, "users");
+        const snapshot = await getDocs(tasksRef);
 
-      const allTasks = [];
-      for (const userDoc of snapshot.docs) {
-        const userId = userDoc.id; // User ID is the document ID
-        const userTasksRef = collection(db, `users/${userId}/tasks`);
-        const userTasksSnapshot = await getDocs(userTasksRef);
+        const allTasks = [];
+        for (const userDoc of snapshot.docs) {
+          const userId = userDoc.id;
+          const userTasksRef = collection(db, `users/${userId}/tasks`);
+          const userTasksSnapshot = await getDocs(userTasksRef);
 
-        // Add each user's tasks to allTasks
-        userTasksSnapshot.forEach((taskDoc) => {
-          const taskData = { id: taskDoc.id, ...taskDoc.data(), creator: userId };
-          allTasks.push(taskData);
-        });
+          userTasksSnapshot.forEach((taskDoc) => {
+            const taskData = { id: taskDoc.id, ...taskDoc.data(), creator: userId };
+            allTasks.push(taskData);
+          });
+        }
+
+        this.tasks = allTasks.filter(
+          (task) =>
+            task.assignee === loggedInUserEmail || task.creator === loggedInUserEmail
+        );
+      } catch (error) {
+        console.error("Error fetching tasks:", error.message);
       }
-
-      // Filter tasks assigned to or created by the logged-in user
-      this.tasks = allTasks.filter(
-        (task) => task.assignee === loggedInUserEmail || task.creator === loggedInUserEmail
-      );
     },
     async addTask() {
       const userId = auth.currentUser?.email;
       if (!userId) return console.error("No user logged in");
 
-      const tasksRef = collection(db, `users/${userId}/tasks`);
-      await addDoc(tasksRef, {
-        title: this.newTaskTitle,
-        description: this.newTaskDescription,
-        urgency: this.newTaskUrgency,
-        dueDate: this.newTaskDueDate,
-        assignee: this.newTaskAssignee, // Include assignee
-        completed: false,
-      });
-      this.newTaskTitle = "";
-      this.newTaskDescription = "";
-      this.newTaskUrgency = "";
-      this.newTaskDueDate = "";
-      this.newTaskAssignee = ""; // Reset assignee input
-      this.fetchTasks();
+      try {
+        const tasksRef = collection(db, `users/${userId}/tasks`);
+        await addDoc(tasksRef, {
+          title: this.newTaskTitle,
+          description: this.newTaskDescription,
+          urgency: this.newTaskUrgency,
+          dueDate: this.newTaskDueDate,
+          assignee: this.newTaskAssignee,
+          completed: false,
+        });
+        this.newTaskTitle = "";
+        this.newTaskDescription = "";
+        this.newTaskUrgency = "";
+        this.newTaskDueDate = "";
+        this.newTaskAssignee = "";
+        this.fetchTasks();
+      } catch (error) {
+        console.error("Error adding task:", error.message);
+      }
+    },
+    async deleteTask(taskId) {
+      const userId = auth.currentUser?.email;
+      if (!userId) return console.error("No user logged in");
+
+      try {
+        const taskRef = doc(db, `users/${userId}/tasks`, taskId);
+
+        // Check if task exists
+        const taskDoc = await getDoc(taskRef);
+        if (!taskDoc.exists()) {
+          throw new Error("Task does not exist.");
+        }
+
+        await deleteDoc(taskRef);
+        this.fetchTasks();
+      } catch (error) {
+        console.error("Error deleting task:", error.message);
+      }
+    },
+    async toggleTaskCompletion(taskId, completed) {
+      const userId = auth.currentUser?.email;
+      if (!userId) return console.error("No user logged in");
+
+      try {
+        const taskRef = doc(db, `users/${userId}/tasks`, taskId);
+
+        // Check if task exists
+        const taskDoc = await getDoc(taskRef);
+        if (!taskDoc.exists()) {
+          throw new Error("Task does not exist.");
+        }
+
+        await updateDoc(taskRef, { completed: !completed });
+        this.fetchTasks();
+      } catch (error) {
+        console.error("Error toggling task completion:", error.message);
+      }
     },
     openEditModal(task) {
       this.editTaskId = task.id;
@@ -189,50 +235,46 @@ export default {
       this.editTaskDescription = task.description;
       this.editTaskUrgency = task.urgency;
       this.editTaskDueDate = task.dueDate;
-      this.editTaskAssignee = task.assignee; // Set assignee for editing
+      this.editTaskAssignee = task.assignee;
       this.isEditModalOpen = true;
     },
     async updateTask() {
       const userId = auth.currentUser?.email;
       if (!userId || !this.editTaskId) return console.error("Invalid operation");
 
-      const taskRef = doc(db, `users/${userId}/tasks`, this.editTaskId);
-      await updateDoc(taskRef, {
-        title: this.editTaskTitle,
-        description: this.editTaskDescription,
-        urgency: this.editTaskUrgency,
-        dueDate: this.editTaskDueDate,
-        assignee: this.editTaskAssignee, // Include assignee when updating
-      });
-      this.isEditModalOpen = false;
-      this.fetchTasks();
+      try {
+        const taskRef = doc(db, `users/${userId}/tasks`, this.editTaskId);
+
+        // Check if task exists
+        const taskDoc = await getDoc(taskRef);
+        if (!taskDoc.exists()) {
+          throw new Error("Task does not exist.");
+        }
+
+        await updateDoc(taskRef, {
+          title: this.editTaskTitle,
+          description: this.editTaskDescription,
+          urgency: this.editTaskUrgency,
+          dueDate: this.editTaskDueDate,
+          assignee: this.editTaskAssignee,
+        });
+        this.isEditModalOpen = false;
+        this.fetchTasks();
+      } catch (error) {
+        console.error("Error updating task:", error.message);
+      }
     },
     closeEditModal() {
       this.isEditModalOpen = false;
     },
-    async deleteTask(taskId) {
-      const userId = auth.currentUser?.email;
-      if (!userId) return console.error("No user logged in");
-
-      const taskRef = doc(db, `users/${userId}/tasks`, taskId);
-      await deleteDoc(taskRef);
-      this.fetchTasks();
-    },
-    async toggleTaskCompletion(taskId, completed) {
-      const userId = auth.currentUser?.email;
-      if (!userId) return console.error("No user logged in");
-
-      const taskRef = doc(db, `users/${userId}/tasks`, taskId);
-      await updateDoc(taskRef, { completed: !completed });
-      this.fetchTasks();
-    },
   },
   mounted() {
     this.fetchTasks();
-    this.fetchUsers(); // Fetch user emails
+    this.fetchUsers();
   },
 };
 </script>
+
 
 <style>
 .sticky-note {
@@ -245,7 +287,6 @@ export default {
   min-height: 150px;
   overflow: hidden;
   padding-bottom: 20px;
-  /* Add padding to the bottom of each sticky note */
 }
 
 .note-high {
@@ -275,7 +316,6 @@ export default {
   font-size: 16px;
   color: #d32f2f;
   cursor: pointer;
-  padding-bottom: 20px;
 }
 
 .edit-btn {
@@ -287,7 +327,6 @@ export default {
   font-size: 16px;
   color: #1976d2;
   cursor: pointer;
-  padding-bottom: 20px;
 }
 
 .modal {
@@ -307,8 +346,6 @@ export default {
   padding: 20px;
   border-radius: 8px;
   width: 400px;
-  /* margin-top: 10px;
-  margin-bottom: 10px; */
 }
 
 .taskblock {
