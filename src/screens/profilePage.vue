@@ -2,8 +2,21 @@
   <NavBar />
   <div class="profile-container">
     <h1>My Profile</h1>
-    <input type="image" />
-    <img src="../assets/profiledefault.png" class="profile-image" />
+    <!-- Profile Image -->
+    <label for="profile-image-upload" class="profile-image-label">
+      <img
+        :src="profileImage || '../assets/profiledefault.png'"
+        class="profile-image"
+        alt="Profile Image"
+      />
+      <input
+        type="file"
+        id="profile-image-upload"
+        accept="image/*"
+        @change="uploadProfileImage"
+        hidden
+      />
+    </label>
     <div class="profile-fields">
       <h2>Name:</h2>
       <input
@@ -51,6 +64,91 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import NavBar from "@/components/navBar.vue";
+import { ref, onMounted } from "vue";
+import { auth, db, storage } from "../../firebase";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+
+const name = ref("");
+const age = ref("");
+const id = ref("");
+const email = ref(auth.currentUser.email);
+const phone = ref("");
+const profileImage = ref("");
+const isSaved = ref(false);
+
+onMounted(async () => {
+  const docreff = doc(db, "users", auth.currentUser.email);
+  const userDocSnapshot = await getDoc(docreff);
+
+  if (userDocSnapshot.exists) {
+    const userData = userDocSnapshot.data();
+    name.value = userData.name;
+    age.value = userData.age;
+    id.value = userData.id;
+    email.value = userData.email || auth.currentUser.email;
+    phone.value = userData.phone;
+    profileImage.value = userData.profileImage || ""; // Load existing profile image URL
+  }
+});
+
+async function uploadProfileImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const imageRef = storageRef(
+    storage,
+    `profile-images/${auth.currentUser.email}/${file.name}`
+  );
+
+  try {
+    await uploadBytes(imageRef, file);
+    const imageURL = await getDownloadURL(imageRef);
+    profileImage.value = imageURL;
+
+    // Save the image URL to Firestore
+    const docref = doc(db, "users", auth.currentUser.email);
+    await updateDoc(docref, {
+      profileImage: imageURL,
+    });
+
+    console.log("Profile image uploaded and saved successfully.");
+  } catch (error) {
+    console.error("Error uploading profile image:", error);
+  }
+}
+
+async function savedetails() {
+  const docref = doc(db, "users", auth.currentUser.email);
+
+  // Create an object with fields that were modified
+  const updatedFields = {};
+
+  if (name.value) updatedFields.name = name.value;
+  if (age.value) updatedFields.age = age.value;
+  if (id.value) updatedFields.id = id.value;
+  if (phone.value) updatedFields.phone = phone.value;
+  if (profileImage.value) updatedFields.profileImage = profileImage.value;
+
+  // Update Firestore with the modified fields
+  if (Object.keys(updatedFields).length > 0) {
+    await updateDoc(docref, updatedFields);
+    console.log("Details updated successfully.");
+
+    isSaved.value = true;
+    setTimeout(() => {
+      isSaved.value = false;
+    }, 3000);
+  }
+}
+</script>
 
 <style scoped>
 /* General Layout */
@@ -138,6 +236,16 @@ h2 {
   border: 1px solid #c3e6cb;
 }
 
+.profile-image-label {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+}
+
+.profile-image-label:hover .profile-image {
+  opacity: 0.8;
+}
+
 @media (max-width: 768px) {
   .profile-container {
     width: 90%;
@@ -154,51 +262,3 @@ h2 {
   }
 }
 </style>
-
-const isSaved = ref(false); // This will control the success message visibility
-function savedetails() { // Logic for saving details (you can use Firebase or
-any other method here) // Simulate a successful save isSaved.value = true; //
-Hide the success message after a few seconds setTimeout(() => { isSaved.value =
-false; }, 3000); // Hide the message after 3 seconds }
-
-<script setup>
-import NavBar from "@/components/navBar.vue";
-import { onMounted, ref } from "vue";
-import { auth, db } from "../../firebase";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
-
-const name = ref("");
-const age = ref("");
-const id = ref("");
-const email = ref(auth.currentUser.email);
-const phone = ref("");
-const isSaved = ref(false);
-
-onMounted(async () => {
-  const docreff = doc(db, "users", auth.currentUser.email);
-  const userDocSnapshot = await getDoc(docreff);
-
-  if (userDocSnapshot.exists) {
-    name.value = userDocSnapshot.data().name;
-    age.value = userDocSnapshot.data().age;
-    id.value = userDocSnapshot.data().id;
-    email.value = userDocSnapshot.data().email;
-    phone.value = userDocSnapshot.data().phone;
-  }
-});
-
-function savedetails() {
-  const docref = doc(db, "users", auth.currentUser.email);
-  updateDoc(docref, {
-    name: name.value,
-    age: age.value,
-    id: id.value,
-    email: email.value,
-    phone: phone.value,
-  });
-  isSaved.value = true;
-  setTimeout(() => {
-    isSaved.value = false;
-  }, 3000);
-}
-</script>
