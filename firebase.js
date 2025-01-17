@@ -12,6 +12,8 @@ import {
   deleteDoc,
   getDocs,
   query,
+  writeBatch,
+  where
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -47,4 +49,6 @@ export {
   getDocs,
   query,
   storage,
+  writeBatch,
+  where
 };
