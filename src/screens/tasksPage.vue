@@ -260,17 +260,17 @@ export default {
       try {
         const curremail = auth.currentUser.email;
         const taskRef = doc(db, `users/${curremail}/tasks`, task.id);
-        console.log(1);
+        // console.log(1);
         var taskref2 = "";
         if (curremail == task.creator) {
-          console.log(3);
+          // console.log(3);
           const reff = collection(db, `users/${task.assignee}/tasks`);
           const q = query(reff, where("creator", "==", curremail));
-          console.log(q);
+          // console.log(q);
           const ss = await getDocs(q);
           taskref2 = doc(db, `users/${task.assignee}/tasks`, ss.docs[0].id);
         } else {
-          console.log(2);
+          // console.log(2);
           const reff = collection(db, `users/${task.creator}/tasks`);
           const q = query(reff, where("assignee", "==", curremail));
           const ss = await getDocs(q);
@@ -311,14 +311,14 @@ export default {
         }
 
         if (curremail == task.creator) {
-          console.log(3);
+          // console.log(3);
           const reff = collection(db, `users/${task.assignee}/tasks`);
           const q = query(reff, where("creator", "==", curremail));
-          console.log(q);
+          // console.log(q);
           const ss = await getDocs(q);
           taskref2 = doc(db, `users/${task.assignee}/tasks`, ss.docs[0].id);
         } else {
-          console.log(2);
+          // console.log(2);
           const reff = collection(db, `users/${task.creator}/tasks`);
           const q = query(reff, where("assignee", "==", curremail));
           const ss = await getDocs(q);
@@ -361,10 +361,10 @@ export default {
         var taskref2;
 
         if (curremail == this.currentopentaskid) {
-          console.log(3);
+          // console.log(3);
           const reff = collection(db, `users/${this.editTaskAssignee}/tasks`);
           const q = query(reff, where("creator", "==", curremail));
-          console.log(q);
+          // console.log(q);
           const ss = await getDocs(q);
           taskref2 = doc(
             db,
@@ -372,7 +372,7 @@ export default {
             ss.docs[0].id
           );
         } else {
-          console.log(2);
+          // console.log(2);
           const reff = collection(db, `users/${this.currentopentaskid}/tasks`);
           const q = query(reff, where("assignee", "==", curremail));
           const ss = await getDocs(q);
