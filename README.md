@@ -2,79 +2,93 @@
 
 The SGBookCouncil Digital PA System is a cost-effective web platform designed to assist administrators in arranging and scheduling meetings, automating follow-up tasks, summarizing email threads, and improving overall administrative efficiency.
 
-## **Table of Contents**
+# Who is in Paris (team name)
 
-1. [Problem Statement](#problem-statement)
-2. [Solution](#solution)
-3. [Key Features](#key-features)
-4. [Tech Stack](#tech-stack)
-5. [Database Structure](#database-structure)
-6. [Impact and Novelty](#impact-and-novelty)
-7. [Getting Started](#getting-started)
+## Team Members:
 
----
-
-## **Problem Statement**
-
-The SGBookCouncil faces challenges in:
-
-- Arranging and scheduling meetings efficiently.
-- Automating routine tasks like sending follow-ups and reminders.
-- Generating concise summaries of email threads.
+- Lau Tse Ern Andre
+- Leong GuangXian Daniel
+- Loh Yi Tern Hansel
+- Liew JunHong
 
 ---
 
-## **Solution**
+## Project: Singapore Book Council Portal
 
-We developed a web-based portal with:
+### Table of Contents
 
-- **Meeting Management**: Schedule and manage meetings with ease.
-- **Task Automation**: Assign and track tasks effectively.
-- **AI-Powered Summaries**: Summarize email threads for quick reference.
-
----
-
-## **Key Features**
-
-### 1. **Meetings**
-
-- Add new meetings to the calendar for a global schedule overview.
-- Include other users in meetings, reflecting on their personal calendars.
-- View a global calendar for team visibility.
-
-### 2. **Tasks**
-
-- Create tasks with detailed descriptions and deadlines.
-- Assign tasks to other users, enabling efficient task tracking and completion.
-
-### 3. **AI Summarizer**
-
-- Utilize AI to summarize email threads quickly and concisely.
+1. Problem
+2. Solution
+3. Impact & Novelty
+4. Product Demo
 
 ---
 
-## **Tech Stack**
+### Problem
+
+Our portal addresses three key challenges:
+
+1. **Arranging & Scheduling Meetings**: Simplify coordination through integrated calendars.
+2. **Task Automation**: Automate follow-up tasks and reminders.
+3. **Email Summaries**: Provide efficient AI-generated email summaries.
+
+---
+
+### Solution
+
+We developed a **web portal** with the following features:
+
+- **Meetings**: Create and manage personal and team calendars with reminders.
+- **Tasks**: Assign, track, and automate reminders for personal and shared tasks.
+- **AI Features**: Summarize email threads efficiently using ChatGPT APIs.
+
+#### Tech Stack
 
 - **Frontend**: Vue.js
-- **Backend**: Firebase and Firestore
-- **APIs**: ChatGPT API for AI summarization
+- **Backend**: Firebase, Firestore
+- **APIs**: Chat GPT API
 
 ---
 
-## **Impact and Novelty**
+### Features
 
-- **Integrated Task Automation**: Combines scheduling, task management, and email summarization into a single platform.
-- **Scalable**: Built using Firebase, capable of handling many users and expandable for new features.
-- **Ease of Use**: Intuitive UI ensures quick adoption and minimal learning curve.
-- **Cost-Effective**: Offers robust functionality without the need for expensive enterprise tools.
+#### 1. Meetings
 
-### **Key Benefits**
+- Add meetings to personal and shared calendars.
+- View schedules at a glance.
+- Get reminders 24 hours and a week before meetings.
 
-- Reduces time spent on manual administrative tasks.
-- Enhances team communication and collaboration.
-- Provides a scalable solution for growing organizations.
+#### 2. Tasks
+
+- Add tasks with details and deadlines.
+- Assign tasks to team members with tracking capabilities.
+- Automated reminders for task deadlines.
+
+#### 3. AI Summariser
+
+- Summarize email threads quickly and efficiently.
 
 ---
+
+### Impact & Novelty
+
+#### Key Advantages:
+
+1. **Integrated Task Automation**: Combines scheduling, task management, and email summarization in one platform.
+2. **Easy & Cost-Effective**: Intuitive UI and minimal maintenance cost.
+3. **Scalability**: Built on Firebase, supporting high user loads and easy feature expansion.
+
+#### Benefits:
+
+- Reduces time spent on manual operations.
+- Increases administrative efficiency.
+- Provides a seamless experience for users.
+
+---
+
+### Product Demo
+
+For a live demo of our portal, please refer to the project showcase.
 
 ## **Getting Started**
 
@@ -98,24 +112,8 @@ We developed a web-based portal with:
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### run the project
 
 ```
 npm run serve
 ```
-
-### Compiles and minifies for production
-
-```
-npm run build
-```
-
-### Lints and fixes files
-
-```
-npm run lint
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).

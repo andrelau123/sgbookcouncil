@@ -243,6 +243,8 @@ export default {
             assignee: this.newTaskAssignee,
             completed: false,
             creator: userId,
+            dismissed: false,
+            newTask: true,
           });
         }
         this.newTaskTitle = "";
