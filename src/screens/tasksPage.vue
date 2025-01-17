@@ -242,6 +242,7 @@ export default {
           assignee: this.newTaskAssignee,
           completed: false,
           creator: userId,
+          dismissed: false,
         });
         if (userId != this.newTaskAssignee) {
           const tasksRef2 = collection(
