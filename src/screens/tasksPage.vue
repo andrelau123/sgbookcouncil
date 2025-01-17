@@ -149,7 +149,7 @@ export default {
       newTaskUrgency: "",
       newTaskDueDate: "",
       newTaskAssignee: "",
-      activeTab: "given", // Tracks the current tab
+      activeTab: "given",
       isEditModalOpen: false,
       editTaskId: null,
       editTaskTitle: "",
@@ -158,7 +158,7 @@ export default {
       editTaskDueDate: "",
       editTaskAssignee: "",
       currentopentaskid: "",
-      allUsers: [], // Added this for `allUsers` to avoid undefined reference
+      allUsers: [],
     };
   },
   computed: {
@@ -193,22 +193,6 @@ export default {
         const snapshot = await getDocs(tasksRef);
 
         const allTasks = [];
-
-        // for (const userDoc of snapshot.docs) {
-        //   const userId = userDoc.id;
-        //   console.log(userId);
-        //   const userTasksRef = collection(db, `users/${userId}/tasks`);
-        //   const userTasksSnapshot = await getDocs(userTasksRef);
-
-        //   userTasksSnapshot.forEach((taskDoc) => {
-        //     const taskData = {
-        //       id: taskDoc.id,
-        //       ...taskDoc.data(),
-        //       creator: userId,
-        //     };
-        //     allTasks.push(taskData);
-        //   });
-        // }
 
         snapshot.forEach((taskdoc) => {
           const taskdata = {
