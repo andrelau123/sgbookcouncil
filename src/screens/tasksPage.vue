@@ -73,6 +73,7 @@
             <h4>{{ task.title }}</h4>
             <p>{{ task.description }}</p>
             <p><strong>Assigned to:</strong> {{ task.assignee }}</p>
+            <p><strong>Assigned by:</strong> {{ task.creator }}</p>
             <p><strong>Due:</strong> {{ task.dueDate }}</p>
           </div>
           <button
@@ -243,6 +244,7 @@ export default {
           completed: false,
           creator: userId,
           dismissed: false,
+          newTask: true,
         });
         if (userId != this.newTaskAssignee) {
           const tasksRef2 = collection(

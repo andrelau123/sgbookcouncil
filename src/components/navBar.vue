@@ -38,11 +38,25 @@
             You have {{ notificationCount }} new notifications.
           </p>
 
+          <!-- <ul v-if="notifications.length > 0" class="notification-list">
+            <li
+              v-for="notification in notifications"
+              :key="notification.eventId"
+              class="notification-item mb-2 p-2"
+            >
+              {{ notification.message }}
+            </li>
+          </ul> -->
           <ul v-if="notifications.length > 0" class="notification-list">
             <li
               v-for="notification in notifications"
               :key="notification.eventId"
               class="notification-item mb-2 p-2"
+              :class="{
+                'notification-task': notification.taskId,
+                'notification-meeting': notification.meetingId,
+                'notification-task-new': notification.newTask,
+              }"
             >
               {{ notification.message }}
             </li>
@@ -233,16 +247,26 @@ const fetchAndMonitorEvents = async () => {
           const timeDifference = taskdate - currentTime;
           if (timeDifference > 0 && timeDifference <= 24 * 60 * 60 * 1000) {
             notifications.value.push({
-              message: `You have a task due at ${taskdate.toLocaleTimeString(
-                [],
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
+              message: `You have a task due on ${taskdate.toLocaleDateString(
+                "en-US"
               )} for ${event.title}.`,
               eventId: event.eventId,
               timeRemaining: Math.floor(timeDifference / (60 * 60 * 1000)), // Hours remaining
               taskId: event.taskId,
+            });
+            notificationCount.value += 1;
+          }
+
+          if (event.newTask) {
+            notifications.value.push({
+              message: `You have a new task assigned to you by ${event.creator},
+              due on ${taskdate.toLocaleDateString("en-US")} for ${
+                event.title
+              }.`,
+              eventId: event.eventId,
+              timeRemaining: Math.floor(timeDifference / (60 * 60 * 1000)), // Hours remaining
+              taskId: event.taskId,
+              newTask: true,
             });
             notificationCount.value += 1;
           }
@@ -268,14 +292,25 @@ const clearNotifications = async () => {
         );
         batch.update(eventRef, { dismissed: true }); // Update dismissed status to true
       } else {
-        const eventRef = doc(
-          db,
-          "users",
-          currentUser.email,
-          "tasks",
-          notification.taskId
-        );
-        batch.update(eventRef, { dismissed: true });
+        if (!notification.newTask) {
+          const eventRef = doc(
+            db,
+            "users",
+            currentUser.email,
+            "tasks",
+            notification.taskId
+          );
+          batch.update(eventRef, { dismissed: true });
+        } else {
+          const eventRef = doc(
+            db,
+            "users",
+            currentUser.email,
+            "tasks",
+            notification.taskId
+          );
+          batch.update(eventRef, { newTask: false });
+        }
       }
     });
 
@@ -492,6 +527,39 @@ body {
   object-fit: cover;
   border: 2px solid #fff;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Task Notification */
+.notification-task {
+  background-color: #e0f7fa; /* Light cyan for tasks */
+  border-left: 4px solid #00acc1; /* Cyan accent for tasks */
+}
+
+/* New Task Notification */
+.notification-task-new {
+  background-color: #ffebee; /* Light red for new tasks */
+  border-left: 4px solid #d32f2f; /* Dark red accent for new tasks */
+  color: #b71c1c; /* Red text for emphasis */
+}
+
+/* Meeting Notification */
+.notification-meeting {
+  background-color: #fff3e0; /* Light orange for meetings */
+  border-left: 4px solid #fb8c00; /* Orange accent for meetings */
+}
+
+/* Shared Notification Item Styling */
+.notification-item {
+  border-radius: 5px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  padding: 10px;
+  margin: 5px 0;
+  transition: background-color 0.3s;
+}
+
+.notification-item:hover {
+  background-color: #f1f1f1; /* Subtle hover effect */
+  cursor: pointer;
 }
 
 /* Responsive */
