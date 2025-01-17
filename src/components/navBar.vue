@@ -241,6 +241,23 @@ const fetchAndMonitorEvents = async () => {
             });
             notificationCount.value += 1;
           }
+          if (event.newMeeting) {
+            notifications.value.push({
+              message: `You have a new meeting at ${eventDate.toLocaleTimeString(
+                [],
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}
+               on ${eventDate.toLocaleDateString("en-US")} for ${event.title}.`,
+              eventId: event.eventId,
+              timeRemaining: Math.floor(timeDifference / (60 * 60 * 1000)), // Hours remaining
+              meetingId: event.meetingId,
+              newTask: true,
+            });
+            notificationCount.value += 1;
+          }
         } else {
           //task in 24h
           const taskdate = new Date(event.dueDate);
@@ -283,14 +300,29 @@ const clearNotifications = async () => {
     const batch = writeBatch(db);
     notifications.value.forEach((notification) => {
       if (!notification.taskId) {
-        const eventRef = doc(
-          db,
-          "users",
-          currentUser.email,
-          "meeting",
-          notification.meetingId
-        );
-        batch.update(eventRef, { dismissed: true }); // Update dismissed status to true
+        console.log("1");
+        if (!notification.newTask) {
+          console.log("3");
+          const eventRef = doc(
+            db,
+            "users",
+            currentUser.email,
+            "meeting",
+            notification.meetingId
+          );
+          batch.update(eventRef, { dismissed: true }); // Update dismissed status to true
+        } else {
+          console.log("2");
+          const eventRef = doc(
+            db,
+            "users",
+            currentUser.email,
+            "meeting",
+            notification.meetingId
+          );
+          console.log("4");
+          batch.update(eventRef, { newMeeting: false });
+        }
       } else {
         if (!notification.newTask) {
           const eventRef = doc(
@@ -451,25 +483,44 @@ body {
 }
 
 /* Notification Dropdown */
-.dropdown-menu {
+/* .dropdown-menu {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fbf4eb !important;
-}
+} */
 .dropdown-menu-end {
   width: 250px;
   right: 0;
   left: auto;
 }
-.profile {
-  width: 150px !important;
+
+/* Notification Dropdown */
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fbf4eb !important;
+  max-height: 600px; /* Set a maximum height for the dropdown */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
+  padding-right: 10px; /* Add right padding for a scrollbar */
 }
-/* Notification List Styling */
+
+/* Adjust the notification list's padding to avoid clipping with the scrollbar */
 .notification-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  padding-right: 10px; /* Add padding to ensure the scrollbar doesn't overlap text */
 }
+
+.profile {
+  width: 150px !important;
+}
+/* Notification List Styling */
+/* .notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+} */
 
 /* Notification Item Styling */
 .notification-item {
