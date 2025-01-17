@@ -16,19 +16,18 @@
 					class="col-md-6 col-12 mb-1"
 				/>
                 <label class="col-md-6 col-12">Participants:</label>
-				<select
-					v-model="selectedParticipants" multiple
-					class="col-md-6 mb-1 col-12"
-				>
-                
-                <option
-                    v-for="participant in participants"
-                    :key="participant.id"
-                    :value="participant.id"
-                >
-                    {{ participant.id }}
-                </option>
-				</select>
+                <div class="checkbox-container">
+                    <label v-for="participant in participants" :key="participant.id" class="checkbox-label">
+                        <input
+                        type="checkbox"
+                        :value="participant.id"
+                        v-model="selectedParticipants"
+                        class="checkbox-input"
+                        />
+                        {{ participant.id }}
+                    </label>
+                    </div>
+
 
 				<label class="col-md-6 col-12">Meeting Start Time:</label>
 				<select
@@ -578,4 +577,59 @@ select {
 select {
 	font-size: 1.1rem;
 }
+.checkbox-container {
+  display: flex;
+  flex-wrap: wrap; /* Allows the checkboxes to wrap nicely */
+  gap: 15px; /* Space between checkboxes */
+  padding: 10px;
+  background-color: #f9f9f9; /* Light gray background for the container */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 400px; /* Set a width for better alignment */
+  margin: 0 auto; /* Center the container */
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between the checkbox and text */
+  font-size: 1rem;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.checkbox-input {
+  accent-color: #4e9df8; /* Customize checkbox color */
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-custom {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+  background-color: #4e9df8; /* Checked state color */
+  border-color: #4e9df8;
+}
+
+.checkbox-label:hover .checkbox-custom {
+  border-color: #4e9df8; /* Border changes on hover */
+}
+
+.checkbox-container p {
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 100%; /* Makes it span the full container */
+}
+
 </style>
