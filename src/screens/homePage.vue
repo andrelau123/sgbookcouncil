@@ -10,9 +10,9 @@ const selectedCalendar = ref("myCalendar");
   <navBar />
   <div class="container">
     <!-- Welcome Back Header -->
-    <div class="welcome-header">
+    <!-- <div class="welcome-header">
       <h1>Welcome Back, {{ userName }}!</h1>
-    </div>
+    </div> -->
 
     <div class="dropdown-container">
       <label for="calendar-select" class="dropdown-label"
@@ -24,7 +24,7 @@ const selectedCalendar = ref("myCalendar");
         class="dropdown-select"
       >
         <option value="myCalendar">My Calendar</option>
-        <option value="orgCalendar">Organization Calendar</option>
+        <option value="orgCalendar">Team Calendar</option>
       </select>
     </div>
 
@@ -35,7 +35,7 @@ const selectedCalendar = ref("myCalendar");
     </div>
 
     <div v-else>
-      <h2>Organization Calendar</h2>
+      <h2>Team Calendar</h2>
       <OrgCalendar />
     </div>
   </div>
